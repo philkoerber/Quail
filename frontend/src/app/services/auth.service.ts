@@ -20,7 +20,7 @@ export interface AuthResponse {
     providedIn: 'root',
 })
 export class AuthService {
-    private apiUrl = '/api/auth';
+    private apiUrl = 'http://localhost:3000/auth';
     private currentUserSubject: BehaviorSubject<User | null>;
     public currentUser$: Observable<User | null>;
     public isAuthenticated$: Observable<boolean>;

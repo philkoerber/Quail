@@ -63,7 +63,7 @@ export class BacktestService {
 
     private async simulateBacktest(backtestId: string) {
         // Simulate LEAN CLI backtest results
-        const mockResults = {
+        const mockResults: Record<string, any> = {
             totalReturn: 0.15,
             sharpeRatio: 1.2,
             maxDrawdown: -0.08,

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -9,11 +7,17 @@ services:
       POSTGRES_USER: quail_user
       POSTGRES_PASSWORD: quail_password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d
     networks:
       - quail_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quail_user -d quail_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # NestJS API
   api:
@@ -27,9 +31,11 @@ services:
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-in-production
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - quail_network
+    restart: unless-stopped
 
   # Angular Frontend
   frontend:
