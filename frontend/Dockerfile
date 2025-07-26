@@ -10,12 +10,15 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:alpine
+FROM node:18-alpine
 
-COPY --from=build /app/dist/quail-frontend /usr/share/nginx/html
+WORKDIR /app
 
-COPY nginx.conf /etc/nginx/nginx.conf
+# Install serve to serve static files
+RUN npm install -g serve
 
-EXPOSE 80
+COPY --from=build /app/dist/quail-frontend /app/dist
 
-CMD ["nginx", "-g", "daemon off;"] 
+EXPOSE 4200
+
+CMD ["serve", "-s", "dist", "-l", "4200"] 

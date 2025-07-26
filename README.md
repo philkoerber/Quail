@@ -6,7 +6,7 @@ A comprehensive trading strategy development platform that leverages backtesting
 
 The system is built with a modern microservices architecture:
 
-- **Frontend**: Angular 16 with Tailwind CSS and ngx-charts
+- **Frontend**: Angular 16 with Tailwind CSS and ngx-charts, served with Node.js serve
 - **API Layer**: NestJS with JWT authentication
 - **Database**: PostgreSQL for data persistence
 - **Backend Services**: 
@@ -31,14 +31,20 @@ The system is built with a modern microservices architecture:
 
 2. **Start all services with Docker Compose:**
    ```bash
-   docker-compose up -d
+   docker-compose up --build
    ```
 
 3. **Access the application:**
    - Frontend: http://localhost:4200
    - API: http://localhost:3000
-   - PostgreSQL: localhost:5432
+   - PostgreSQL: localhost:5433
    - Ollama: http://localhost:11434
+
+### Test Credentials
+
+For testing the application, you can use these pre-created credentials:
+- **Email:** `test@example.com`
+- **Password:** `testpass123`
 
 ### Development Setup
 
@@ -84,6 +90,9 @@ Quail/
 │   │   └── main.ts
 │   ├── package.json
 │   └── Dockerfile
+├── docker/
+│   └── postgres/
+│       └── init.sql/           # Database initialization scripts
 └── README.md
 ```
 
@@ -94,6 +103,7 @@ The system uses JWT-based authentication with access and refresh tokens:
 - **Access Token**: 15-minute expiration
 - **Refresh Token**: 7-day expiration with rotation
 - **Password Hashing**: bcrypt with salt rounds of 10
+- **User Registration**: Requires email, password, firstName, and lastName fields
 
 ## 📊 Database Schema
 
@@ -119,23 +129,23 @@ The system uses JWT-based authentication with access and refresh tokens:
 ## 🛠️ API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Token refresh
+- `POST /auth/register` - User registration (requires email, password, firstName, lastName)
+- `POST /auth/login` - User login (requires email, password)
+- `POST /auth/refresh` - Token refresh (requires refreshToken)
 
 ### Strategies
-- `GET /api/strategies` - List user strategies
-- `POST /api/strategies` - Create new strategy
-- `GET /api/strategies/:id` - Get strategy details
-- `PUT /api/strategies/:id` - Update strategy
-- `DELETE /api/strategies/:id` - Delete strategy
-- `POST /api/strategies/:id/suggestions` - Get improvement suggestions
+- `GET /strategies` - List user strategies
+- `POST /strategies` - Create new strategy
+- `GET /strategies/:id` - Get strategy details
+- `PUT /strategies/:id` - Update strategy
+- `DELETE /strategies/:id` - Delete strategy
+- `POST /strategies/:id/suggestions` - Get improvement suggestions
 
 ### Backtests
-- `GET /api/backtests` - List user backtests
-- `POST /api/backtests` - Create new backtest
-- `GET /api/backtests/:id` - Get backtest results
-- `DELETE /api/backtests/:id` - Delete backtest
+- `GET /backtests` - List user backtests
+- `POST /backtests` - Create new backtest
+- `GET /backtests/:id` - Get backtest results
+- `DELETE /backtests/:id` - Delete backtest
 
 ## 🎨 Frontend Features
 
@@ -150,11 +160,14 @@ The system uses JWT-based authentication with access and refresh tokens:
 
 ### Environment Variables
 
-Create a `.env` file in the root directory:
+The application is configured through Docker Compose environment variables:
 
 ```env
 # Database
 DATABASE_URL=postgresql://quail_user:quail_password@postgres:5432/quail_db
+POSTGRES_DB=quail_db
+POSTGRES_USER=quail_user
+POSTGRES_PASSWORD=quail_password
 
 # JWT
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -166,6 +179,13 @@ API_PORT=3000
 # Frontend
 FRONTEND_PORT=4200
 ```
+
+### Database Initialization
+
+The PostgreSQL database is automatically initialized with:
+- Database creation
+- User role setup with proper permissions
+- Automatic table creation via TypeORM synchronization
 
 ## 🚀 Deployment
 
