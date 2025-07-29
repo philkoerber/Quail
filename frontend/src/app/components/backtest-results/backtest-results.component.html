@@ -3,9 +3,71 @@
     <h1 class="text-3xl font-bold text-gray-900">Backtest Results</h1>
     <p class="mt-2 text-gray-600">View detailed backtest performance</p>
   </div>
+  
+  <!-- Strategy Info -->
+  <div class="px-4 py-6 sm:px-0">
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">{{ backtestData.strategyName }}</h2>
+        <span class="text-sm text-gray-500">{{ backtestData.period }}</span>
+      </div>
+      
+      <!-- Performance Metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-green-600">{{ backtestData.totalReturn }}%</div>
+          <div class="text-sm text-gray-500">Total Return</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-600">{{ backtestData.sharpeRatio }}</div>
+          <div class="text-sm text-gray-500">Sharpe Ratio</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-red-600">{{ backtestData.maxDrawdown }}%</div>
+          <div class="text-sm text-gray-500">Max Drawdown</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-purple-600">{{ backtestData.winRate }}%</div>
+          <div class="text-sm text-gray-500">Win Rate</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-indigo-600">{{ backtestData.totalTrades }}</div>
+          <div class="text-sm text-gray-500">Total Trades</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-600">1.0</div>
+          <div class="text-sm text-gray-500">Beta</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
   <div class="px-4 py-6 sm:px-0">
     <div class="bg-white shadow rounded-lg p-6">
-      <p class="text-gray-500">Backtest results component with charts - to be implemented</p>
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Performance Chart</h3>
+      <div #chartContainer class="w-full"></div>
+    </div>
+  </div>
+
+  <!-- Additional Charts Section -->
+  <div class="px-4 py-6 sm:px-0">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Returns Distribution -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Returns Distribution</h3>
+        <div class="h-64 flex items-center justify-center text-gray-500">
+          <p>Chart to be implemented</p>
+        </div>
+      </div>
+      
+      <!-- Drawdown Chart -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Drawdown Analysis</h3>
+        <div class="h-64 flex items-center justify-center text-gray-500">
+          <p>Chart to be implemented</p>
+        </div>
+      </div>
     </div>
   </div>
 </div> 
