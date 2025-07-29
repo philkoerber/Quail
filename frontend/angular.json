@@ -60,10 +60,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "quail-frontend:build:production"
+              "buildTarget": "quail-frontend:build:production"
             },
             "development": {
-              "browserTarget": "quail-frontend:build:development"
+              "buildTarget": "quail-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -71,7 +71,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "quail-frontend:build"
+            "buildTarget": "quail-frontend:build"
           }
         },
         "test": {
