@@ -27,7 +27,7 @@ import { AuthGuard } from './guards/auth.guard';
         BrowserAnimationsModule,
         ReactiveFormsModule,
         RouterModule.forRoot([
-            { path: '', redirectTo: '/login', pathMatch: 'full' },
+            { path: '', component: AppComponent },
             { path: 'login', component: LoginComponent },
             { path: 'register', component: RegisterComponent },
             { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },

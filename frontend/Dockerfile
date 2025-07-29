@@ -17,8 +17,10 @@ WORKDIR /app
 # Install serve to serve static files
 RUN npm install -g serve
 
-COPY --from=build /app/dist/quail-frontend /app/dist
+# Copy the built application contents to the dist directory
+COPY --from=build /app/dist/quail-frontend/* /app/dist/
 
 EXPOSE 4200
 
+# Serve the application from the dist directory
 CMD ["serve", "-s", "dist", "-l", "4200"] 

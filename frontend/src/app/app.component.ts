@@ -53,7 +53,17 @@ export class AppComponent {
     private router: Router,
   ) {
     this.authService.isAuthenticated$.subscribe(
-      isAuth => this.isAuthenticated = isAuth
+      isAuth => {
+        this.isAuthenticated = isAuth;
+        // Handle redirection for root path
+        if (this.router.url === '/') {
+          if (isAuth) {
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        }
+      }
     );
   }
 
