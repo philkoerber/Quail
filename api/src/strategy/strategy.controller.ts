@@ -4,6 +4,7 @@ import { StrategyService } from './strategy.service';
 
 @Controller('strategies')
 @UseGuards(JwtAuthGuard)
+
 export class StrategyController {
     constructor(private strategyService: StrategyService) { }
 
@@ -12,7 +13,6 @@ export class StrategyController {
         name: string;
         description: string;
         code: string;
-        parameters: Record<string, any>;
     }) {
         return this.strategyService.create(req.user.userId, strategyData);
     }
@@ -35,10 +35,5 @@ export class StrategyController {
     @Delete(':id')
     async remove(@Request() req, @Param('id') id: string) {
         return this.strategyService.remove(req.user.userId, id);
-    }
-
-    @Post(':id/suggestions')
-    async getImprovementSuggestions(@Param('id') id: string, @Body() backtestResults: any) {
-        return this.strategyService.getImprovementSuggestions(id, backtestResults);
     }
 } 

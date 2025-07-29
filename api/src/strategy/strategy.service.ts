@@ -14,7 +14,6 @@ export class StrategyService {
         name: string;
         description: string;
         code: string;
-        parameters: Record<string, any>;
     }) {
         const strategy = this.strategyRepository.create({
             ...strategyData,
@@ -57,22 +56,4 @@ export class StrategyService {
         return this.strategyRepository.remove(strategy);
     }
 
-    async getImprovementSuggestions(strategyId: string, backtestResults: any) {
-        // This would integrate with Ollama to get LLM suggestions
-        // For now, returning a mock response
-        return {
-            suggestions: [
-                {
-                    type: 'parameter_optimization',
-                    description: 'Consider adjusting the moving average period from 20 to 14 for better responsiveness',
-                    code: '// Update the moving average calculation\nself.sma_period = 14',
-                },
-                {
-                    type: 'risk_management',
-                    description: 'Add a stop-loss mechanism to limit potential losses',
-                    code: '// Add stop-loss logic\nif self.Portfolio.TotalUnrealizedProfit < -0.05:\n    self.Liquidate()',
-                },
-            ],
-        };
-    }
 } 

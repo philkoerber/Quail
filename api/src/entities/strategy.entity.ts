@@ -16,9 +16,6 @@ export class Strategy {
     @Column('text')
     code: string; // Python code for the strategy
 
-    @Column('json')
-    parameters: Record<string, any>; // Strategy parameters
-
     @Column({ default: false })
     isActive: boolean;
 
