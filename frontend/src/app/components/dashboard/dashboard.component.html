@@ -1,124 +1,123 @@
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto py-8 px-6">
   <!-- Header -->
-  <div class="px-4 py-6 sm:px-0">
+  <div class="mb-8">
     <div class="flex items-center space-x-4">
-      <img src="assets/quaillogo.svg" alt="Quail Logo" class="h-12 w-12">
+      <img src="assets/quaillogo.svg" alt="Quail Logo" class="h-10 w-10">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p class="mt-2 text-gray-600">Welcome back, {{ user?.firstName }}!</p>
+        <h1 class="text-2xl font-semibold text-neutral-800">Dashboard</h1>
+        <p class="mt-1 text-neutral-500 text-sm">Welcome back, {{ user?.firstName }}!</p>
       </div>
     </div>
   </div>
 
   <!-- Quick Actions -->
-  <div class="px-4 py-6 sm:px-0">
+  <div class="mb-8">
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
+      <!-- Total Strategies Card -->
+      <div class="bg-neutral-25 border border-neutral-200 rounded-lg shadow-soft">
+        <div class="p-6">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+              <div class="h-10 w-10 bg-neutral-100 rounded-lg flex items-center justify-center">
+                <svg class="h-5 w-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
             </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">Total Strategies</dt>
-                <dd class="text-lg font-medium text-gray-900">{{ stats.strategies }}</dd>
-              </dl>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-neutral-600">Total Strategies</p>
+              <p class="text-xl font-semibold text-neutral-800">{{ stats.strategies }}</p>
             </div>
           </div>
         </div>
-        <div class="bg-gray-50 px-5 py-3">
-          <div class="text-sm">
-            <a routerLink="/strategies" class="font-medium text-primary-700 hover:text-primary-900">
-              View all strategies
-            </a>
-          </div>
+        <div class="bg-neutral-50 px-6 py-3 border-t border-neutral-150">
+          <a routerLink="/strategies" class="text-sm font-medium text-neutral-600 hover:text-neutral-800 transition-colors">
+            View all strategies →
+          </a>
         </div>
       </div>
 
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
+      <!-- Total Backtests Card -->
+      <div class="bg-neutral-25 border border-neutral-200 rounded-lg shadow-soft">
+        <div class="p-6">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
+              <div class="h-10 w-10 bg-neutral-100 rounded-lg flex items-center justify-center">
+                <svg class="h-5 w-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
             </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">Total Backtests</dt>
-                <dd class="text-lg font-medium text-gray-900">{{ stats.backtests }}</dd>
-              </dl>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-neutral-600">Total Backtests</p>
+              <p class="text-xl font-semibold text-neutral-800">{{ stats.backtests }}</p>
             </div>
           </div>
         </div>
-        <div class="bg-gray-50 px-5 py-3">
-          <div class="text-sm">
-            <a href="#" class="font-medium text-primary-700 hover:text-primary-900">
-              View backtest results
-            </a>
-          </div>
+        <div class="bg-neutral-50 px-6 py-3 border-t border-neutral-150">
+          <a href="#" class="text-sm font-medium text-neutral-600 hover:text-neutral-800 transition-colors">
+            View backtest results →
+          </a>
         </div>
       </div>
 
-      <!-- Performance Overview Chart -->
-      <div class="bg-white overflow-hidden shadow rounded-lg col-span-full">
-        <div class="p-5">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Portfolio Performance</h3>
-          <div #performanceChart class="w-full"></div>
-        </div>
-      </div>
-
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="p-5">
+      <!-- Active Strategies Card -->
+      <div class="bg-neutral-25 border border-neutral-200 rounded-lg shadow-soft">
+        <div class="p-6">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
+              <div class="h-10 w-10 bg-neutral-100 rounded-lg flex items-center justify-center">
+                <svg class="h-5 w-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
             </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">Active Strategies</dt>
-                <dd class="text-lg font-medium text-gray-900">{{ stats.activeStrategies }}</dd>
-              </dl>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-neutral-600">Active Strategies</p>
+              <p class="text-xl font-semibold text-neutral-800">{{ stats.activeStrategies }}</p>
             </div>
           </div>
         </div>
-        <div class="bg-gray-50 px-5 py-3">
-          <div class="text-sm">
-            <a routerLink="/strategies/new" class="font-medium text-primary-700 hover:text-primary-900">
-              Create new strategy
-            </a>
-          </div>
+        <div class="bg-neutral-50 px-6 py-3 border-t border-neutral-150">
+          <a routerLink="/strategies/new" class="text-sm font-medium text-neutral-600 hover:text-neutral-800 transition-colors">
+            Create new strategy →
+          </a>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Performance Overview Chart -->
+  <div class="mb-8">
+    <div class="bg-neutral-25 border border-neutral-200 rounded-lg shadow-soft">
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-neutral-800 mb-4">Portfolio Performance</h3>
+        <div #performanceChart class="w-full"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Recent Activity -->
-  <div class="px-4 py-6 sm:px-0">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <ul class="divide-y divide-gray-200">
-        <li *ngFor="let activity of recentActivity" class="px-6 py-4">
+  <div>
+    <h2 class="text-lg font-medium text-neutral-800 mb-4">Recent Activity</h2>
+    <div class="bg-neutral-25 border border-neutral-200 rounded-lg shadow-soft overflow-hidden">
+      <ul class="divide-y divide-neutral-150">
+        <li *ngFor="let activity of recentActivity" class="px-6 py-4 hover:bg-neutral-50 transition-colors">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-                  <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                <div class="h-8 w-8 bg-neutral-100 rounded-full flex items-center justify-center">
+                  <svg class="h-4 w-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-gray-900">{{ activity.title }}</p>
-                <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                <p class="text-sm font-medium text-neutral-800">{{ activity.title }}</p>
+                <p class="text-sm text-neutral-500">{{ activity.description }}</p>
               </div>
             </div>
-            <div class="text-sm text-gray-500">{{ activity.time }}</div>
+            <div class="text-sm text-neutral-400">{{ activity.time }}</div>
           </div>
         </li>
       </ul>
