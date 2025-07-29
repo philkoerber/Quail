@@ -1,6 +1,6 @@
 # Quail - Iterative Strategy Builder
 
-A comprehensive trading strategy development platform that leverages backtesting, machine learning, and LLM-powered suggestions to create and refine trading strategies through an iterative process.
+A comprehensive trading strategy development platform that leverages backtesting, machine learning, and LLM-powered improvements to create and refine trading strategies through an iterative process.
 
 ## 🏗️ Architecture Overview
 
@@ -122,8 +122,7 @@ The system uses JWT-based authentication with access and refresh tokens:
 2. **Strategy Creation**: Users create trading strategies with Python code
 3. **Backtest Execution**: LEAN CLI runs backtests on strategies
 4. **Results Analysis**: Performance metrics are calculated and stored
-5. **LLM Suggestions**: Ollama generates improvement suggestions based on results
-6. **Strategy Refinement**: Users implement suggestions and re-test
+6. **Strategy Refinement**: AI implements improvements and re-test
 7. **Iterative Improvement**: Continuous cycle of testing and refinement
 
 ## 🛠️ API Endpoints
@@ -139,7 +138,6 @@ The system uses JWT-based authentication with access and refresh tokens:
 - `GET /strategies/:id` - Get strategy details
 - `PUT /strategies/:id` - Update strategy
 - `DELETE /strategies/:id` - Delete strategy
-- `POST /strategies/:id/suggestions` - Get improvement suggestions
 
 ### Backtests
 - `GET /backtests` - List user backtests
@@ -153,7 +151,7 @@ The system uses JWT-based authentication with access and refresh tokens:
 - **Authentication**: Login/register forms with validation
 - **Dashboard**: Overview of strategies and performance
 - **Strategy Management**: CRUD operations for trading strategies
-- **Backtest Visualization**: Charts and metrics display (ngx-charts)
+- **Backtest Visualization**: Charts and metrics display
 - **Real-time Updates**: WebSocket integration for live data
 
 ## 🔧 Configuration
