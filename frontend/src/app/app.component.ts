@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
 
 @Component({
-  selector: 'app-root',
-  template: `
+    selector: 'app-root',
+    template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Navigation -->
       <nav *ngIf="isAuthenticated" class="bg-white shadow-sm border-b">
@@ -43,6 +43,7 @@ import { AuthService } from './services/auth.service';
       </main>
     </div>
   `,
+    standalone: false
 })
 export class AppComponent {
   isAuthenticated = false;
