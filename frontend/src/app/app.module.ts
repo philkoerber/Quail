@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -14,8 +14,7 @@ import { StrategyFormComponent } from './components/strategy-form/strategy-form.
 import { BacktestResultsComponent } from './components/backtest-results/backtest-results.component';
 import { AuthGuard } from './guards/auth.guard';
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         LoginComponent,
         RegisterComponent,
@@ -24,10 +23,8 @@ import { AuthGuard } from './guards/auth.guard';
         StrategyFormComponent,
         BacktestResultsComponent,
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         BrowserAnimationsModule,
-        HttpClientModule,
         ReactiveFormsModule,
         RouterModule.forRoot([
             { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -38,9 +35,5 @@ import { AuthGuard } from './guards/auth.guard';
             { path: 'strategies/new', component: StrategyFormComponent, canActivate: [AuthGuard] },
             { path: 'strategies/:id/edit', component: StrategyFormComponent, canActivate: [AuthGuard] },
             { path: 'backtests/:id', component: BacktestResultsComponent, canActivate: [AuthGuard] },
-        ]),
-    ],
-    providers: [],
-    bootstrap: [AppComponent],
-})
+        ])], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { } 
