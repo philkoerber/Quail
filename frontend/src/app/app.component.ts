@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
 
 @Component({
-    selector: 'app-root',
-    template: `
+  selector: 'app-root',
+  template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Navigation -->
       <nav *ngIf="isAuthenticated" class="bg-white shadow-sm border-b">
@@ -12,7 +12,10 @@ import { AuthService } from './services/auth.service';
           <div class="flex justify-between h-16">
             <div class="flex">
               <div class="flex-shrink-0 flex items-center">
-                <h1 class="text-xl font-bold text-gray-900">Quail</h1>
+                <div class="flex items-center space-x-2">
+                  <img src="assets/quaillogo.svg" alt="Quail Logo" class="h-8 w-8">
+                  <h1 class="text-xl font-bold text-gray-900">Quail</h1>
+                </div>
               </div>
               <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <a routerLink="/dashboard" routerLinkActive="border-primary-500 text-gray-900" 
@@ -42,19 +45,19 @@ import { AuthService } from './services/auth.service';
   `,
 })
 export class AppComponent {
-    isAuthenticated = false;
+  isAuthenticated = false;
 
-    constructor(
-        private authService: AuthService,
-        private router: Router,
-    ) {
-        this.authService.isAuthenticated$.subscribe(
-            isAuth => this.isAuthenticated = isAuth
-        );
-    }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {
+    this.authService.isAuthenticated$.subscribe(
+      isAuth => this.isAuthenticated = isAuth
+    );
+  }
 
-    logout() {
-        this.authService.logout();
-        this.router.navigate(['/login']);
-    }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 } 

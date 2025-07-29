@@ -4,11 +4,14 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-    selector: 'app-register',
-    template: `
+  selector: 'app-register',
+  template: `
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
         <div>
+          <div class="flex justify-center">
+            <img src="assets/quaillogo.svg" alt="Quail Logo" class="h-16 w-16">
+          </div>
           <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account
           </h2>
@@ -63,39 +66,39 @@ import { AuthService } from '../../services/auth.service';
   `,
 })
 export class RegisterComponent {
-    registerForm: FormGroup;
-    loading = false;
-    error = '';
+  registerForm: FormGroup;
+  loading = false;
+  error = '';
 
-    constructor(
-        private formBuilder: FormBuilder,
-        private authService: AuthService,
-        private router: Router,
-    ) {
-        this.registerForm = this.formBuilder.group({
-            firstName: ['', Validators.required],
-            lastName: ['', Validators.required],
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-        });
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+  ) {
+    this.registerForm = this.formBuilder.group({
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+  }
+
+  onSubmit() {
+    if (this.registerForm.invalid) {
+      return;
     }
 
-    onSubmit() {
-        if (this.registerForm.invalid) {
-            return;
-        }
+    this.loading = true;
+    this.error = '';
 
-        this.loading = true;
-        this.error = '';
-
-        this.authService.register(this.registerForm.value).subscribe({
-            next: () => {
-                this.router.navigate(['/login']);
-            },
-            error: (error) => {
-                this.error = error.error?.message || 'Registration failed. Please try again.';
-                this.loading = false;
-            },
-        });
-    }
+    this.authService.register(this.registerForm.value).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        this.error = error.error?.message || 'Registration failed. Please try again.';
+        this.loading = false;
+      },
+    });
+  }
 } 

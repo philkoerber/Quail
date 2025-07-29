@@ -4,11 +4,14 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-    selector: 'app-login',
-    template: `
+  selector: 'app-login',
+  template: `
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
         <div>
+          <div class="flex justify-center">
+            <img src="assets/quaillogo.svg" alt="Quail Logo" class="h-16 w-16">
+          </div>
           <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to Quail
           </h2>
@@ -58,37 +61,37 @@ import { AuthService } from '../../services/auth.service';
   `,
 })
 export class LoginComponent {
-    loginForm: FormGroup;
-    loading = false;
-    error = '';
+  loginForm: FormGroup;
+  loading = false;
+  error = '';
 
-    constructor(
-        private formBuilder: FormBuilder,
-        private authService: AuthService,
-        private router: Router,
-    ) {
-        this.loginForm = this.formBuilder.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', Validators.required],
-        });
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+  ) {
+    this.loginForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+    });
+  }
+
+  onSubmit() {
+    if (this.loginForm.invalid) {
+      return;
     }
 
-    onSubmit() {
-        if (this.loginForm.invalid) {
-            return;
-        }
+    this.loading = true;
+    this.error = '';
 
-        this.loading = true;
-        this.error = '';
-
-        this.authService.login(this.loginForm.value).subscribe({
-            next: () => {
-                this.router.navigate(['/dashboard']);
-            },
-            error: (error) => {
-                this.error = error.error?.message || 'Login failed. Please try again.';
-                this.loading = false;
-            },
-        });
-    }
+    this.authService.login(this.loginForm.value).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        this.error = error.error?.message || 'Login failed. Please try again.';
+        this.loading = false;
+      },
+    });
+  }
 } 

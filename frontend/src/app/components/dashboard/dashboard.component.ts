@@ -3,13 +3,18 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-    selector: 'app-dashboard',
-    template: `
+  selector: 'app-dashboard',
+  template: `
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="px-4 py-6 sm:px-0">
-        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p class="mt-2 text-gray-600">Welcome back, {{ user?.firstName }}!</p>
+        <div class="flex items-center space-x-4">
+          <img src="assets/quaillogo.svg" alt="Quail Logo" class="h-12 w-12">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p class="mt-2 text-gray-600">Welcome back, {{ user?.firstName }}!</p>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Actions -->
@@ -122,32 +127,32 @@ import { AuthService } from '../../services/auth.service';
   `,
 })
 export class DashboardComponent implements OnInit {
-    user: any;
-    stats = {
-        strategies: 0,
-        backtests: 0,
-        activeStrategies: 0,
-    };
-    recentActivity = [
-        {
-            title: 'Strategy Created',
-            description: 'Moving Average Crossover strategy was created',
-            time: '2 hours ago',
-        },
-        {
-            title: 'Backtest Completed',
-            description: 'Backtest for Strategy #1 completed with 15% return',
-            time: '1 day ago',
-        },
-    ];
+  user: any;
+  stats = {
+    strategies: 0,
+    backtests: 0,
+    activeStrategies: 0,
+  };
+  recentActivity = [
+    {
+      title: 'Strategy Created',
+      description: 'Moving Average Crossover strategy was created',
+      time: '2 hours ago',
+    },
+    {
+      title: 'Backtest Completed',
+      description: 'Backtest for Strategy #1 completed with 15% return',
+      time: '1 day ago',
+    },
+  ];
 
-    constructor(
-        private authService: AuthService,
-        private router: Router,
-    ) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) { }
 
-    ngOnInit() {
-        this.user = this.authService.currentUserValue;
-        // In a real app, you would fetch stats and recent activity from the API
-    }
+  ngOnInit() {
+    this.user = this.authService.currentUserValue;
+    // In a real app, you would fetch stats and recent activity from the API
+  }
 } 
