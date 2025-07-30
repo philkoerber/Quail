@@ -58,6 +58,26 @@ services:
       - quail_network
     command: npm start -- --host 0.0.0.0 --poll 2000
 
+  # LEAN CLI for backtest execution - Development
+  lean-cli:
+    build:
+      context: ./lean-cli
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./lean-cli:/app
+      - lean_cli_data:/app/data
+      - lean_cli_results:/app/results
+      - lean_cli_strategies:/app/strategies
+    environment:
+      LEAN_DATA_DIR: /app/data
+      LEAN_RESULTS_DIR: /app/results
+      LEAN_STRATEGIES_DIR: /app/strategies
+    networks:
+      - quail_network
+    restart: unless-stopped
+
   # Ollama for LLM management
   ollama:
     image: ollama/ollama:latest
@@ -71,6 +91,9 @@ services:
 volumes:
   postgres_data:
   ollama_data:
+  lean_cli_data:
+  lean_cli_results:
+  lean_cli_strategies:
 
 networks:
   quail_network:

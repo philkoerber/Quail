@@ -11,7 +11,7 @@ The system is built with a modern microservices architecture:
 - **Database**: PostgreSQL for data persistence
 - **Backend Services**: 
   - Ollama for LLM management
-  - LEAN CLI for backtesting
+  - LEAN Engine for backtest execution
   - scikit-learn for ML model training
 - **Deployment**: Docker Compose for easy containerization
 
@@ -37,6 +37,7 @@ The system is built with a modern microservices architecture:
 3. **Access the application:**
    - Frontend: http://localhost:4200
    - API: http://localhost:3000
+   - LEAN Engine: http://localhost:8000
    - PostgreSQL: localhost:5433
    - Ollama: http://localhost:11434
 
@@ -90,6 +91,12 @@ Quail/
 │   │   └── main.ts
 │   ├── package.json
 │   └── Dockerfile
+├── lean-engine/                # LEAN Engine service
+│   ├── main.py                 # FastAPI application
+│   ├── requirements.txt        # Python dependencies
+│   ├── Dockerfile              # Production container
+│   ├── Dockerfile.dev          # Development container
+│   └── README.md               # Service documentation
 ├── docker/
 │   └── postgres/
 │       └── init.sql/           # Database initialization scripts
@@ -120,7 +127,7 @@ The system uses JWT-based authentication with access and refresh tokens:
 
 1. **User Registration/Login**: JWT-based authentication
 2. **Strategy Creation**: Users create trading strategies with Python code
-3. **Backtest Execution**: LEAN CLI runs backtests on strategies
+3. **Backtest Execution**: LEAN Engine service runs backtests on strategies
 4. **Results Analysis**: Performance metrics are calculated and stored
 6. **Strategy Refinement**: AI implements improvements and re-test
 7. **Iterative Improvement**: Continuous cycle of testing and refinement
