@@ -11,8 +11,6 @@ export class BacktestController {
     async create(@Request() req, @Body() backtestData: {
         strategyId: string;
         name: string;
-        startDate: Date;
-        endDate: Date;
     }) {
         return this.backtestService.create(
             req.user.userId,

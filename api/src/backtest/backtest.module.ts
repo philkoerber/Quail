@@ -3,12 +3,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BacktestController } from './backtest.controller';
 import { BacktestService } from './backtest.service';
 import { Backtest } from '../entities/backtest.entity';
-import { Metric } from '../entities/metric.entity';
+import { Strategy } from '../entities/strategy.entity';
+import { LeanModule } from 'src/lean/lean.module';
+
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Backtest, Metric])],
+    imports: [
+        TypeOrmModule.forFeature([Backtest, Strategy]),
+        LeanModule,
+    ],
     controllers: [BacktestController],
     providers: [BacktestService],
     exports: [BacktestService],
 })
-export class BacktestModule { } 
+export class BacktestModule {}

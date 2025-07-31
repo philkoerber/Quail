@@ -121,14 +121,13 @@ The system uses JWT-based authentication with access and refresh tokens:
 - **Backtest**: Backtest results and performance metrics
 - **Model**: Trained machine learning models
 - **Token**: Authentication token management
-- **Metric**: Detailed performance metrics
 
 ## 🔄 Workflow
 
 1. **User Registration/Login**: JWT-based authentication
 2. **Strategy Creation**: Users create trading strategies with Python code
 3. **Backtest Execution**: LEAN Engine service runs backtests on strategies
-4. **Results Analysis**: Performance metrics are calculated and stored
+4. **Results Analysis**: Performance metrics are stored
 6. **Strategy Refinement**: AI implements improvements and re-test
 7. **Iterative Improvement**: Continuous cycle of testing and refinement
 

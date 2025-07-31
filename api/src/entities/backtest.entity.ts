@@ -14,20 +14,6 @@ export class Backtest {
     @Column('json')
     results: Record<string, any>; // Backtest results
 
-    @Column('json')
-    performance: {
-        totalReturn: number;
-        sharpeRatio: number;
-        maxDrawdown: number;
-        winRate: number;
-    };
-
-    @Column('date')
-    startDate: Date;
-
-    @Column('date')
-    endDate: Date;
-
     @Column({ default: 'completed' })
     status: 'running' | 'completed' | 'failed';
 
@@ -46,6 +32,4 @@ export class Backtest {
     @CreateDateColumn()
     createdAt: Date;
 
-    @OneToMany(() => Metric, metric => metric.backtest)
-    metrics: Metric[];
 } 

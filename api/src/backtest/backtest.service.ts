@@ -2,37 +2,54 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Backtest } from '../entities/backtest.entity';
-import { Metric } from '../entities/metric.entity';
+import { Strategy } from 'src/entities/strategy.entity';
+import { LeanService } from 'src/lean/lean.service';
 
 @Injectable()
 export class BacktestService {
-    constructor(
-        @InjectRepository(Backtest)
-        private backtestRepository: Repository<Backtest>,
-        @InjectRepository(Metric)
-        private metricRepository: Repository<Metric>,
-    ) { }
+  constructor(
+    @InjectRepository(Backtest)
+    private readonly backtestRepository: Repository<Backtest>,
 
-    async create(userId: string, strategyId: string, backtestData: {
-        name: string;
-        startDate: Date;
-        endDate: Date;
-    }) {
-        const backtest = this.backtestRepository.create({
-            ...backtestData,
-            userId,
-            strategyId,
-            status: 'running',
-        });
+    @InjectRepository(Strategy)
+    private readonly strategyRepository: Repository<Strategy>,
 
-        const savedBacktest = await this.backtestRepository.save(backtest);
+    private readonly leanService: LeanService,
+  ) {}
 
-        // In a real implementation, this would trigger LEAN CLI backtest
-        // For now, we'll simulate the backtest results
-        await this.simulateBacktest(savedBacktest.id);
+  async create(
+    userId: string,
+    strategyId: string,
+    data: { name: string; },
+  ) {
+    const strategy = await this.strategyRepository.findOne({
+      where: { id: strategyId, userId },
+    });
+    if (!strategy) throw new NotFoundException('Strategy not found');
 
-        return savedBacktest;
+    const backtest = await this.backtestRepository.save(
+      this.backtestRepository.create({
+        ...data,
+        userId,
+        strategyId,
+        status: 'running',
+      }),
+    );
+
+    try {
+      const results = await this.leanService.runBacktest(strategyId, strategy.code);
+
+      await this.backtestRepository.update(backtest.id, {
+        results,
+        status: 'completed',
+      });
+    } catch (err) {
+      await this.backtestRepository.update(backtest.id, { status: 'failed' });
+      throw err;
     }
+
+    return this.findOne(userId, backtest.id);
+  }
 
     async findAll(userId: string) {
         return this.backtestRepository.find({
@@ -59,38 +76,5 @@ export class BacktestService {
         const backtest = await this.findOne(userId, id);
 
         return this.backtestRepository.remove(backtest);
-    }
-
-    private async simulateBacktest(backtestId: string) {
-        // Simulate LEAN CLI backtest results
-        const mockResults: Record<string, any> = {
-            totalReturn: 0.15,
-            sharpeRatio: 1.2,
-            maxDrawdown: -0.08,
-            winRate: 0.65,
-        };
-
-        const mockMetrics = [
-            { name: 'Total Return', value: 15, unit: '%' },
-            { name: 'Sharpe Ratio', value: 1.2, unit: '' },
-            { name: 'Max Drawdown', value: -8, unit: '%' },
-            { name: 'Win Rate', value: 65, unit: '%' },
-        ];
-
-        // Update backtest with results
-        await this.backtestRepository.update(backtestId, {
-            status: 'completed',
-            results: mockResults,
-            performance: mockResults,
-        });
-
-        // Save metrics
-        for (const metric of mockMetrics) {
-            await this.metricRepository.save({
-                ...metric,
-                backtestId,
-                metadata: {},
-            });
-        }
     }
 } 

@@ -9,7 +9,6 @@ import { Strategy } from './entities/strategy.entity';
 import { Backtest } from './entities/backtest.entity';
 import { Model } from './entities/model.entity';
 import { Token } from './entities/token.entity';
-import { Metric } from './entities/metric.entity';
 
 @Module({
     imports: [
@@ -19,7 +18,7 @@ import { Metric } from './entities/metric.entity';
         TypeOrmModule.forRoot({
             type: 'postgres',
             url: process.env.DATABASE_URL,
-            entities: [User, Strategy, Backtest, Model, Token, Metric],
+            entities: [User, Strategy, Backtest, Model, Token],
             synchronize: true, // Only for development
             logging: true,
         }),
