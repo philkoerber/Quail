@@ -15,7 +15,7 @@ export class BacktestService {
     private readonly strategyRepository: Repository<Strategy>,
 
     private readonly leanService: LeanService,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -51,30 +51,30 @@ export class BacktestService {
     return this.findOne(userId, backtest.id);
   }
 
-    async findAll(userId: string) {
-        return this.backtestRepository.find({
-            where: { userId },
-            relations: ['strategy'],
-            order: { createdAt: 'DESC' },
-        });
+  async findAll(userId: string) {
+    return this.backtestRepository.find({
+      where: { userId },
+      relations: ['strategy'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findOne(userId: string, id: string) {
+    const backtest = await this.backtestRepository.findOne({
+      where: { id, userId },
+      relations: ['strategy', 'metrics'],
+    });
+
+    if (!backtest) {
+      throw new NotFoundException('Backtest not found');
     }
 
-    async findOne(userId: string, id: string) {
-        const backtest = await this.backtestRepository.findOne({
-            where: { id, userId },
-            relations: ['strategy', 'metrics'],
-        });
+    return backtest;
+  }
 
-        if (!backtest) {
-            throw new NotFoundException('Backtest not found');
-        }
+  async remove(userId: string, id: string) {
+    const backtest = await this.findOne(userId, id);
 
-        return backtest;
-    }
-
-    async remove(userId: string, id: string) {
-        const backtest = await this.findOne(userId, id);
-
-        return this.backtestRepository.remove(backtest);
-    }
+    return this.backtestRepository.remove(backtest);
+  }
 } 

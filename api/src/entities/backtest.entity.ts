@@ -1,7 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
 import { Strategy } from './strategy.entity';
-import { Metric } from './metric.entity';
 
 @Entity('backtests')
 export class Backtest {
