@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { StrategyService } from './strategy.service';
-import { CreateStrategyDto, UpdateStrategyDto, IdParamDto } from '../dto';
+import { CreateStrategyDto, UpdateStrategyDto } from './dto';
+import { IdParamDto } from '../common/dto';
 
 @Controller('strategies')
 @UseGuards(JwtAuthGuard)

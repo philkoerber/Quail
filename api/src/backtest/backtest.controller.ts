@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BacktestService } from './backtest.service';
-import { CreateBacktestDto, IdParamDto } from '../dto';
+import { CreateBacktestDto } from './dto';
+import { IdParamDto } from '../common/dto';
 
 @Controller('backtests')
 @UseGuards(JwtAuthGuard)
