@@ -36,24 +36,37 @@ export class BacktestService {
       }),
     );
 
-    try {
-      const results = await this.leanService.runBacktest(strategyId, strategy.code);
-
-      await this.backtestRepository.update(backtest.id, {
-        results,
-        status: 'completed',
-      });
-    } catch (err) {
-      await this.backtestRepository.update(backtest.id, { status: 'failed' });
-      throw err;
-    }
+    // Start backtest asynchronously
+    this.runBacktestAsync(backtest.id, strategy.code);
 
     return this.findOne(userId, backtest.id);
   }
 
-  async findAll(userId: string) {
+  private async runBacktestAsync(backtestId: string, strategyCode: string) {
+    try {
+      const results = await this.leanService.runBacktest(backtestId, strategyCode);
+
+      await this.backtestRepository.update(backtestId, {
+        results,
+        status: 'completed',
+      });
+    } catch (err) {
+      console.error('Backtest failed:', err);
+      await this.backtestRepository.update(backtestId, {
+        status: 'failed',
+        results: { error: err.message }
+      });
+    }
+  }
+
+  async findAll(userId: string, strategyId?: string) {
+    const where: any = { userId };
+    if (strategyId) {
+      where.strategyId = strategyId;
+    }
+
     return this.backtestRepository.find({
-      where: { userId },
+      where,
       relations: ['strategy'],
       order: { createdAt: 'DESC' },
     });

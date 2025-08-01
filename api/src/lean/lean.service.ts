@@ -1,36 +1,63 @@
 // src/lean/lean.service.ts
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-
-const execAsync = promisify(exec);
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class LeanService {
+    private readonly leanCliUrl = process.env.LEAN_CLI_URL || 'http://localhost:8000';
+
+    constructor(private readonly httpService: HttpService) { }
+
     async runBacktest(strategyId: string, code: string): Promise<any> {
-        const projectDir = path.resolve(`./temp/${strategyId}`);
-        const codePath = path.join(projectDir, 'main.py');
-        const resultsPath = path.join(projectDir, 'backtest-results.json');
-
         try {
-            await fs.mkdir(projectDir, { recursive: true });
-            await fs.writeFile(codePath, code);
+            // Start the backtest
+            const backtestRequest = {
+                backtest_id: strategyId,
+                strategy_code: code
+            };
 
-            const command = `docker run --rm -v ${projectDir}:/Lean/Strategy quantconnect/lean:latest backtest "main.py"`;
+            const startResponse = await firstValueFrom(
+                this.httpService.post(`${this.leanCliUrl}/backtest`, backtestRequest)
+            );
 
-            const { stdout, stderr } = await execAsync(command, { cwd: projectDir });
-
-            if (stderr) {
-                console.error('LEAN CLI STDERR:', stderr);
+            if (startResponse.status !== 200) {
+                throw new Error('Failed to start backtest');
             }
 
-            const resultJson = await fs.readFile(resultsPath, 'utf8');
-            return JSON.parse(resultJson);
-        } catch (err) {
-            console.error('LeanService Error:', err);
-            throw new InternalServerErrorException('LEAN backtest failed');
+            // Poll for results
+            let attempts = 0;
+            const maxAttempts = 60; // 5 minutes with 5-second intervals
+            const pollInterval = 5000; // 5 seconds
+
+            while (attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+                attempts++;
+
+                try {
+                    const resultResponse = await firstValueFrom(
+                        this.httpService.get(`${this.leanCliUrl}/backtest/${strategyId}`)
+                    );
+
+                    if (resultResponse.status === 200) {
+                        const result = resultResponse.data;
+
+                        if (result.status === 'completed') {
+                            return result.results || result.performance;
+                        } else if (result.status === 'failed') {
+                            throw new Error(result.error || 'Backtest failed');
+                        }
+                        // If still running, continue polling
+                    }
+                } catch (error) {
+                    console.error('Error polling backtest result:', error);
+                }
+            }
+
+            throw new Error('Backtest timed out');
+        } catch (error) {
+            console.error('LeanService Error:', error);
+            throw new InternalServerErrorException('LEAN backtest failed: ' + error.message);
         }
     }
 }

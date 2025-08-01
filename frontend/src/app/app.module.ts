@@ -38,7 +38,6 @@ import { authInterceptor } from './interceptors/auth.interceptor';
             { path: 'strategies', component: StrategyListComponent, canActivate: [AuthGuard] },
             { path: 'strategies/new', component: StrategyFormComponent, canActivate: [AuthGuard] },
             { path: 'strategies/:id', component: StrategyDetailComponent, canActivate: [AuthGuard] },
-            { path: 'strategies/:id/edit', component: StrategyFormComponent, canActivate: [AuthGuard] },
             { path: 'backtests/:id', component: BacktestResultsComponent, canActivate: [AuthGuard] },
         ])], providers: [provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor]))]
 })

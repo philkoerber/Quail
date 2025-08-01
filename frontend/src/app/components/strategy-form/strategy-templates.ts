@@ -8,23 +8,32 @@ export const strategyTemplates: StrategyTemplate[] = [
     {
         id: 'default-template',
         name: 'Default Template',
-        code: `# region imports
-from AlgorithmImports import *
-# endregion
+        code: `from AlgorithmImports import *
 
-class DefaultTemplate(QCAlgorithm):
+class StrategyAlgorithm(QCAlgorithm):
+    def Initialize(self):
+        self.SetStartDate(2020, 1, 1)
+        self.SetEndDate(2023, 12, 31)
+        self.SetCash(100000)
+        
+        # Add equities
+        self.spy = self.AddEquity("SPY")
+        self.bnd = self.AddEquity("BND")
+        self.aapl = self.AddEquity("AAPL")
+        
+        # Set benchmark
+        self.SetBenchmark("SPY")
+        
+        # Set warmup period
+        self.SetWarmUp(30)
 
-    def initialize(self):
-        self.set_start_date(2024, 1, 31)
-        self.set_cash(100000)
-        self.add_equity("SPY", Resolution.MINUTE)
-        self.add_equity("BND", Resolution.MINUTE)
-        self.add_equity("AAPL", Resolution.MINUTE)
-
-    def on_data(self, data: Slice):
-        if not self.portfolio.invested:
-            self.set_holdings("SPY", 0.33)
-            self.set_holdings("BND", 0.33)
-            self.set_holdings("AAPL", 0.33)`
+    def OnData(self, data):
+        if self.IsWarmingUp:
+            return
+            
+        if not self.Portfolio.Invested:
+            self.SetHoldings("SPY", 0.33)
+            self.SetHoldings("BND", 0.33)
+            self.SetHoldings("AAPL", 0.33)`
     }
 ]; 

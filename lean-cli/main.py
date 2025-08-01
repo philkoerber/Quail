@@ -26,9 +26,6 @@ app.add_middleware(
 class BacktestRequest(BaseModel):
     backtest_id: str  # Use the existing backtest ID from the API
     strategy_code: str
-    start_date: str
-    end_date: str
-    initial_capital: float = 100000.0
 
 class BacktestResult(BaseModel):
     backtest_id: str
@@ -98,7 +95,7 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
             f.write(request.strategy_code)
         
         # Create LEAN configuration
-        config = create_lean_config(backtest_id, request, strategy_dir)
+        config = create_lean_config(backtest_id, strategy_dir)
         config_file = strategy_dir / "config.json"
         with open(config_file, "w") as f:
             json.dump(config, f, indent=2)
@@ -117,7 +114,7 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
         max_drawdown = random.uniform(-0.3, -0.05)  # -30% to -5%
         win_rate = random.uniform(0.3, 0.8)  # 30% to 80%
         
-        final_portfolio_value = request.initial_capital * (1 + total_return)
+        final_portfolio_value = 100000 * (1 + total_return)  # Default initial capital
         
         # Generate realistic backtest results
         results = {
@@ -144,7 +141,7 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
         backtest_status[backtest_id]["status"] = "failed"
         backtest_status[backtest_id]["error"] = str(e)
 
-def create_lean_config(backtest_id: str, request: BacktestRequest, strategy_dir: Path) -> Dict[str, Any]:
+def create_lean_config(backtest_id: str, strategy_dir: Path) -> Dict[str, Any]:
     """Create LEAN CLI configuration"""
     return {
         "environment": "backtesting",
@@ -181,10 +178,8 @@ def create_lean_config(backtest_id: str, request: BacktestRequest, strategy_dir:
         "live-data-port": 8020,
         "live-cash-balance": "",
         "live-holdings": "[]",
-        "results-destination-folder": f"/app/results/{backtest_id}",
-        "start-date": request.start_date,
-        "end-date": request.end_date,
-        "initial-cash": str(request.initial_capital)
+        "results-destination-folder": f"/app/results/{backtest_id}"
+        # Note: start-date, end-date, and initial-cash are now defined in the strategy code
     }
 
 def parse_lean_results(backtest_id: str) -> Optional[Dict[str, Any]]:

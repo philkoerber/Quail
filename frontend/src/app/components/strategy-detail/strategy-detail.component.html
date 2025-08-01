@@ -32,9 +32,15 @@
           {{ strategy.isActive ? 'Active' : 'Inactive' }}
         </span>
         <button 
-          (click)="editStrategy()"
-          class="px-3 py-1.5 bg-neutral-600 text-neutral-25 rounded-lg hover:bg-neutral-700 transition-colors text-sm">
-          Edit
+          (click)="runBacktest()"
+          [disabled]="backtestLoading"
+          class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50">
+          {{ backtestLoading ? 'Running...' : 'Backtest' }}
+        </button>
+        <button 
+          (click)="improveStrategy()"
+          class="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+          Improve
         </button>
         <button 
           (click)="deleteStrategy()"
@@ -58,6 +64,45 @@
       <div class="p-4">
         <pre class="text-sm text-neutral-100 overflow-x-auto"><code>{{ strategy.code }}</code></pre>
       </div>
+    </div>
+
+    <!-- Backtest Results -->
+    <div *ngIf="backtest" class="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+      <h3 class="text-lg font-medium text-neutral-800 mb-4">Latest Backtest Results</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white border border-neutral-200 rounded-lg p-3">
+          <p class="text-sm text-neutral-500">Total Return</p>
+          <p class="text-lg font-semibold" [class]="backtest.results?.totalReturn >= 0 ? 'text-green-600' : 'text-red-600'">
+            {{ backtest.results?.totalReturn ? (backtest.results.totalReturn * 100).toFixed(2) + '%' : 'N/A' }}
+          </p>
+        </div>
+        <div class="bg-white border border-neutral-200 rounded-lg p-3">
+          <p class="text-sm text-neutral-500">Sharpe Ratio</p>
+          <p class="text-lg font-semibold text-neutral-800">
+            {{ backtest.results?.sharpeRatio ? backtest.results.sharpeRatio.toFixed(2) : 'N/A' }}
+          </p>
+        </div>
+        <div class="bg-white border border-neutral-200 rounded-lg p-3">
+          <p class="text-sm text-neutral-500">Max Drawdown</p>
+          <p class="text-lg font-semibold text-red-600">
+            {{ backtest.results?.maxDrawdown ? (backtest.results.maxDrawdown * 100).toFixed(2) + '%' : 'N/A' }}
+          </p>
+        </div>
+      </div>
+      <div class="mt-3 text-xs text-neutral-500">
+        Last updated: {{ backtest.createdAt | date:'short' }}
+      </div>
+    </div>
+
+    <!-- No Backtest Results -->
+    <div *ngIf="!backtest" class="bg-neutral-50 border border-neutral-200 rounded-lg p-6 text-center">
+      <div class="h-12 w-12 bg-neutral-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+        <svg class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <h4 class="text-sm font-medium text-neutral-800 mb-2">No Backtest Results</h4>
+      <p class="text-sm text-neutral-500">Run a backtest to see performance metrics</p>
     </div>
   </div>
 </div> 

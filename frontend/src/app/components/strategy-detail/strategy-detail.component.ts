@@ -13,6 +13,14 @@ interface Strategy {
     updatedAt: string;
 }
 
+interface Backtest {
+    id: string;
+    name: string;
+    results: any;
+    status: 'running' | 'completed' | 'failed';
+    createdAt: string;
+}
+
 @Component({
     selector: 'app-strategy-detail',
     templateUrl: './strategy-detail.component.html',
@@ -20,7 +28,9 @@ interface Strategy {
 })
 export class StrategyDetailComponent implements OnInit {
     strategy: Strategy | null = null;
+    backtest: Backtest | null = null;
     loading = true;
+    backtestLoading = false;
     error = '';
 
     constructor(
@@ -34,6 +44,7 @@ export class StrategyDetailComponent implements OnInit {
         const strategyId = this.route.snapshot.paramMap.get('id');
         if (strategyId) {
             this.loadStrategy(strategyId);
+            this.loadBacktest(strategyId);
         }
     }
 
@@ -52,11 +63,7 @@ export class StrategyDetailComponent implements OnInit {
             });
     }
 
-    editStrategy() {
-        if (this.strategy) {
-            this.router.navigate(['/strategies', this.strategy.id, 'edit']);
-        }
-    }
+
 
     deleteStrategy() {
         if (!this.strategy || !confirm('Are you sure you want to delete this strategy?')) {
@@ -73,5 +80,51 @@ export class StrategyDetailComponent implements OnInit {
                     console.error('Error deleting strategy:', error);
                 }
             });
+    }
+
+    private loadBacktest(strategyId: string) {
+        this.http.get<Backtest[]>(`http://localhost:3000/backtests?strategyId=${strategyId}`)
+            .subscribe({
+                next: (backtests) => {
+                    // Get the most recent completed backtest
+                    this.backtest = backtests
+                        .filter(bt => bt.status === 'completed')
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] || null;
+                },
+                error: (error) => {
+                    console.error('Error loading backtest:', error);
+                }
+            });
+    }
+
+    runBacktest() {
+        if (!this.strategy) return;
+
+        this.backtestLoading = true;
+        this.error = '';
+
+        const backtestData = {
+            name: `Backtest for ${this.strategy.name}`,
+            strategyId: this.strategy.id
+        };
+
+        this.http.post('http://localhost:3000/backtests', backtestData)
+            .subscribe({
+                next: (backtest) => {
+                    this.backtestLoading = false;
+                    // Reload backtest after a short delay to check status
+                    setTimeout(() => this.loadBacktest(this.strategy!.id), 2000);
+                },
+                error: (error) => {
+                    this.backtestLoading = false;
+                    this.error = 'Failed to start backtest';
+                    console.error('Error starting backtest:', error);
+                }
+            });
+    }
+
+    improveStrategy() {
+        // TODO: Implement LLM-based strategy improvement
+        alert('Strategy improvement feature coming soon!');
     }
 } 

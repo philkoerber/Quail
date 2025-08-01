@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BacktestService } from './backtest.service';
 import { CreateBacktestDto } from './dto';
@@ -19,8 +19,8 @@ export class BacktestController {
     }
 
     @Get()
-    async findAll(@Request() req) {
-        return this.backtestService.findAll(req.user.userId);
+    async findAll(@Request() req, @Query('strategyId') strategyId?: string) {
+        return this.backtestService.findAll(req.user.userId, strategyId);
     }
 
     @Get(':id')

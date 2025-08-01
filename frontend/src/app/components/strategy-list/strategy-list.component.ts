@@ -52,9 +52,7 @@ export class StrategyListComponent implements OnInit {
         this.router.navigate(['/strategies', strategyId]);
     }
 
-    editStrategy(strategyId: string) {
-        this.router.navigate(['/strategies', strategyId, 'edit']);
-    }
+
 
     deleteStrategy(strategyId: string) {
         if (!confirm('Are you sure you want to delete this strategy?')) {
