@@ -5,9 +5,9 @@ export class CreateStrategyDto {
     @IsNotEmpty({ message: 'Name is required' })
     name: string;
 
+    @IsOptional()
     @IsString({ message: 'Description must be a string' })
-    @IsNotEmpty({ message: 'Description is required' })
-    description: string;
+    description?: string;
 
     @IsString({ message: 'Code must be a string' })
     @IsNotEmpty({ message: 'Code is required' })

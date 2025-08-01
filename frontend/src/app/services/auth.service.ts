@@ -81,15 +81,32 @@ export class AuthService {
     }
 
     private setUserAndTokens(response: AuthResponse) {
-        localStorage.setItem('currentUser', JSON.stringify(response.user));
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        this.currentUserSubject.next(response.user);
+        if (response.user && response.accessToken && response.refreshToken) {
+            localStorage.setItem('currentUser', JSON.stringify(response.user));
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+            this.currentUserSubject.next(response.user);
+        } else {
+            console.error('Invalid auth response received:', response);
+            this.logout();
+        }
     }
 
     private getUserFromStorage(): User | null {
         const userStr = localStorage.getItem('currentUser');
-        return userStr ? JSON.parse(userStr) : null;
+        if (!userStr || userStr === 'undefined' || userStr === 'null') {
+            return null;
+        }
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error('Error parsing user from localStorage:', error);
+            // Clear invalid data
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            return null;
+        }
     }
 
     getAccessToken(): string | null {

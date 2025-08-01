@@ -1,0 +1,63 @@
+<div class="max-w-7xl mx-auto py-8 px-6">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="text-center py-12">
+    <p class="text-red-600 mb-4">{{ error }}</p>
+    <button 
+      (click)="ngOnInit()"
+      class="px-4 py-2 bg-neutral-600 text-neutral-25 rounded-lg hover:bg-neutral-700 transition-colors">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Strategy Content -->
+  <div *ngIf="strategy && !loading" class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-neutral-800">{{ strategy.name }}</h1>
+        <p class="mt-1 text-neutral-500 text-sm">
+          Created {{ strategy.createdAt | date:'mediumDate' }} • 
+          Last updated {{ strategy.updatedAt | date:'mediumDate' }}
+        </p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span 
+          [class]="strategy.isActive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+          {{ strategy.isActive ? 'Active' : 'Inactive' }}
+        </span>
+        <button 
+          (click)="editStrategy()"
+          class="px-3 py-1.5 bg-neutral-600 text-neutral-25 rounded-lg hover:bg-neutral-700 transition-colors text-sm">
+          Edit
+        </button>
+        <button 
+          (click)="deleteStrategy()"
+          class="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div *ngIf="strategy.description" class="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-neutral-700 mb-2">Description</h3>
+      <p class="text-neutral-600 text-sm whitespace-pre-wrap">{{ strategy.description }}</p>
+    </div>
+
+    <!-- Strategy Code -->
+    <div class="bg-neutral-900 border border-neutral-700 rounded-lg overflow-hidden">
+      <div class="px-4 py-3 bg-neutral-800 border-b border-neutral-700">
+        <h3 class="text-sm font-medium text-neutral-200">Strategy Code</h3>
+      </div>
+      <div class="p-4">
+        <pre class="text-sm text-neutral-100 overflow-x-auto"><code>{{ strategy.code }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -12,7 +12,7 @@ export class StrategyService {
 
     async create(userId: string, strategyData: {
         name: string;
-        description: string;
+        description?: string;
         code: string;
     }) {
         const strategy = this.strategyRepository.create({
