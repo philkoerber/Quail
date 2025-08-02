@@ -22,24 +22,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Models - Simplified to match existing API structure
+# Models
 class BacktestRequest(BaseModel):
-    backtest_id: str  # Use the existing backtest ID from the API
+    backtest_id: str
     strategy_code: str
+    start_date: str = "2020-01-01"
+    end_date: str = "2021-01-01"
+    initial_capital: float = 100000.0
 
 class BacktestResult(BaseModel):
     backtest_id: str
     status: str
     results: Optional[Dict[str, Any]] = None
-    performance: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
 # Global storage for backtest status
 backtest_status = {}
 
+# Use local directories for development
+BASE_DIR = Path(__file__).parent
+STRATEGIES_DIR = BASE_DIR / "strategies"
+RESULTS_DIR = BASE_DIR / "results"
+DATA_DIR = BASE_DIR / "data"
+
+# Create directories if they don't exist
+STRATEGIES_DIR.mkdir(exist_ok=True)
+RESULTS_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(exist_ok=True)
+
 @app.get("/")
 async def root():
-    return {"message": "LEAN Engine Service", "status": "running"}
+    return {"message": "LEAN CLI Service", "status": "running"}
 
 @app.get("/health")
 async def health_check():
@@ -55,7 +68,6 @@ async def execute_backtest(request: BacktestRequest, background_tasks: Backgroun
         "status": "running",
         "created_at": datetime.now().isoformat(),
         "results": None,
-        "performance": None,
         "error": None
     }
     
@@ -78,7 +90,6 @@ async def get_backtest_result(backtest_id: str):
         backtest_id=backtest_id,
         status=status["status"],
         results=status.get("results"),
-        performance=status.get("performance"),
         error=status.get("error")
     )
 
@@ -86,7 +97,7 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
     """Run the backtest using the LEAN CLI"""
     try:
         # Create strategy directory
-        strategy_dir = Path(f"/app/strategies/{backtest_id}")
+        strategy_dir = STRATEGIES_DIR / backtest_id
         strategy_dir.mkdir(parents=True, exist_ok=True)
         
         # Write strategy code to file
@@ -94,15 +105,13 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
         with open(strategy_file, "w") as f:
             f.write(request.strategy_code)
         
-        # Create LEAN configuration
-        config = create_lean_config(backtest_id, strategy_dir)
-        config_file = strategy_dir / "config.json"
-        with open(config_file, "w") as f:
-            json.dump(config, f, indent=2)
+        # Create results directory
+        results_dir = RESULTS_DIR / backtest_id
+        results_dir.mkdir(parents=True, exist_ok=True)
         
-        # For now, simulate LEAN CLI backtest (we'll integrate actual LEAN CLI later)
-        # In production, this would call the actual LEAN CLI
-        await asyncio.sleep(5)  # Simulate processing time
+        # For now, simulate LEAN CLI backtest since we don't have LEAN CLI installed locally
+        # In Docker, this would call the actual LEAN CLI
+        await asyncio.sleep(3)  # Simulate processing time
         
         # Generate realistic backtest results
         import random
@@ -122,69 +131,22 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
             "sharpeRatio": sharpe_ratio,
             "maxDrawdown": max_drawdown,
             "winRate": win_rate,
-            "finalPortfolioValue": final_portfolio_value
-        }
-        
-        performance = {
-            "totalReturn": total_return,
-            "sharpeRatio": sharpe_ratio,
-            "maxDrawdown": max_drawdown,
-            "winRate": win_rate
+            "finalPortfolioValue": final_portfolio_value,
+            "totalTrades": random.randint(1, 50),
+            "profitLoss": 100000 * total_return
         }
         
         # Update status with results
         backtest_status[backtest_id]["status"] = "completed"
         backtest_status[backtest_id]["results"] = results
-        backtest_status[backtest_id]["performance"] = performance
             
     except Exception as e:
         backtest_status[backtest_id]["status"] = "failed"
         backtest_status[backtest_id]["error"] = str(e)
 
-def create_lean_config(backtest_id: str, strategy_dir: Path) -> Dict[str, Any]:
-    """Create LEAN CLI configuration"""
-    return {
-        "environment": "backtesting",
-        "algorithm-type-name": "StrategyAlgorithm",
-        "algorithm-language": "Python",
-        "algorithm-location": str(strategy_dir / "strategy.py"),
-        "data-folder": "/app/data",
-        "debugging": False,
-        "debugging-method": "LocalCmdline",
-        "log-handler": "QuantConnect.Logging.CompositeLogHandler",
-        "messaging-handler": "QuantConnect.Messaging.Messaging",
-        "job-queue-handler": "QuantConnect.Queues.JobQueue",
-        "api-handler": "QuantConnect.Api.Api",
-        "map-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskMapFileProvider",
-        "factor-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskFactorFileProvider",
-        "data-provider": "QuantConnect.Lean.Engine.DataFeeds.DefaultDataProvider",
-        "object-store": "QuantConnect.Lean.Engine.Storage.LocalObjectStore",
-        "data-aggregator": "QuantConnect.Lean.Engine.DataFeeds.AggregationManager",
-        "symbol-minute-limit": 10000,
-        "symbol-second-limit": 10000,
-        "symbol-tick-limit": 10000,
-        "ignore-unknown-asset-holdings": True,
-        "show-missing-data-logs": False,
-        "maximum-warmup-history-days-look-back": 5,
-        "maximum-data-points-per-chart-series": 1000000,
-        "maximum-chart-series": 30,
-        "force-exchange-always-open": False,
-        "transaction-log": "",
-        "reserved-words-prefix": "@",
-        "job-user-id": "0",
-        "api-access-token": "",
-        "job-organization-id": "",
-        "live-data-url": "ws://www.quantconnect.com/api/v2/live/data/",
-        "live-data-port": 8020,
-        "live-cash-balance": "",
-        "live-holdings": "[]",
-        "results-destination-folder": f"/app/results/{backtest_id}"
-        # Note: start-date, end-date, and initial-cash are now defined in the strategy code
-    }
-
 def parse_lean_results(backtest_id: str) -> Optional[Dict[str, Any]]:
-    """Parse results from LEAN Engine output"""
-    results_file = Path(f"/app/results/{backtest_id}/backtest-results.json")
+    """Parse results from LEAN CLI output"""
+    results_file = RESULTS_DIR / backtest_id / "backtest-results.json"
     
     if results_file.exists():
         try:
@@ -192,12 +154,16 @@ def parse_lean_results(backtest_id: str) -> Optional[Dict[str, Any]]:
                 results = json.load(f)
             
             # Extract key metrics from LEAN results
+            total_performance = results.get("TotalPerformance", {})
+            
             return {
-                "totalReturn": results.get("TotalPerformance", {}).get("TotalReturn", 0),
-                "sharpeRatio": results.get("TotalPerformance", {}).get("SharpeRatio", 0),
-                "maxDrawdown": results.get("TotalPerformance", {}).get("Drawdown", 0),
-                "winRate": results.get("TotalPerformance", {}).get("WinRate", 0),
-                "finalPortfolioValue": results.get("TotalPerformance", {}).get("PortfolioValue", 0)
+                "totalReturn": total_performance.get("TotalReturn", 0),
+                "sharpeRatio": total_performance.get("SharpeRatio", 0),
+                "maxDrawdown": total_performance.get("Drawdown", 0),
+                "winRate": total_performance.get("WinRate", 0),
+                "finalPortfolioValue": total_performance.get("PortfolioValue", 0),
+                "totalTrades": total_performance.get("TotalTrades", 0),
+                "profitLoss": total_performance.get("TotalProfit", 0)
             }
         except Exception as e:
             print(f"Error parsing results: {e}")

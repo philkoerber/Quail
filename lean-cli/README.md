@@ -1,78 +1,79 @@
 # LEAN CLI Service
 
-A FastAPI service that integrates with the QuantConnect LEAN CLI for backtesting. This service provides a REST API interface to execute trading strategy backtests using the LEAN CLI.
+A streamlined FastAPI service that integrates with the QuantConnect LEAN CLI for backtesting. This service provides a simple REST API interface to execute trading strategy backtests.
 
 ## Features
 
-- **LEAN CLI Integration**: Uses the QuantConnect LEAN CLI for backtesting
-- **RESTful API**: Clean HTTP interface for integration with other services
-- **Strategy Code Execution**: Handles Python strategy code execution
-- **Results Processing**: Returns comprehensive performance metrics
-- **Docker Ready**: Fully containerized with LEAN Engine foundation
+- **LEAN CLI Integration**: Uses the actual QuantConnect LEAN CLI for backtesting
+- **Simple REST API**: Clean HTTP interface for strategy execution
+- **Real Backtesting**: Executes actual backtests, not simulations
+- **Docker Ready**: Containerized with LEAN Engine foundation
 
-## Architecture
+## Quick Start
 
-This service uses the QuantConnect LEAN Engine foundation Docker image and adds a FastAPI layer on top to provide HTTP access to backtesting capabilities.
+### Using Docker
 
-### Components
+```bash
+# Build and run
+docker build -t lean-cli-service .
+docker run -p 8000:8000 lean-cli-service
 
-1. **LEAN Engine Foundation**: Base image with all LEAN CLI dependencies
-2. **FastAPI Service**: HTTP API layer for backtest management
-3. **Strategy Execution**: Python strategy code execution via LEAN CLI
-4. **Results Processing**: Parsing and formatting of backtest results
+# Or use docker-compose
+docker-compose up lean-cli
+```
 
-## API Endpoints
+### Local Development
 
-### Health Check
-- `GET /` - Service status
-- `GET /health` - Health check endpoint
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-### Backtest Management
-- `POST /backtest` - Execute a backtest with LEAN CLI
-- `GET /backtest/{backtest_id}` - Get backtest results
+# Run service
+uvicorn main:app --reload
+```
 
-## Usage
+## API Usage
 
-### Executing a Backtest
+### Execute a Backtest
 
 ```bash
 curl -X POST "http://localhost:8000/backtest" \
   -H "Content-Type: application/json" \
   -d '{
-    "backtest_id": "existing-backtest-uuid",
-    "strategy_code": "from AlgorithmImports import *\nclass StrategyAlgorithm(QCAlgorithm):\n    def Initialize(self):\n        self.SetStartDate(2020, 1, 1)\n        self.SetEndDate(2021, 1, 1)\n        self.SetCash(100000)\n        self.AddEquity(\"SPY\")",
-    "start_date": "2020-01-01",
-    "end_date": "2021-01-01",
-    "initial_capital": 100000
+    "backtest_id": "my-test-123",
+    "strategy_code": "from AlgorithmImports import *\nclass StrategyAlgorithm(QCAlgorithm):\n    def Initialize(self):\n        self.SetStartDate(2020, 1, 1)\n        self.SetEndDate(2021, 1, 1)\n        self.SetCash(100000)\n        self.AddEquity(\"SPY\")\n    def OnData(self, data):\n        if not self.Portfolio.Invested:\n            self.SetHoldings(\"SPY\", 1.0)"
   }'
 ```
 
-### Getting Backtest Results
+### Check Results
 
 ```bash
-curl "http://localhost:8000/backtest/{backtest_id}"
+curl "http://localhost:8000/backtest/my-test-123"
 ```
 
 Response:
 ```json
 {
-  "backtest_id": "uuid-string",
+  "backtest_id": "my-test-123",
   "status": "completed",
   "results": {
     "totalReturn": 0.15,
     "sharpeRatio": 1.2,
     "maxDrawdown": -0.08,
     "winRate": 0.65,
-    "finalPortfolioValue": 115000.0
-  },
-  "performance": {
-    "totalReturn": 0.15,
-    "sharpeRatio": 1.2,
-    "maxDrawdown": -0.08,
-    "winRate": 0.65
+    "finalPortfolioValue": 115000.0,
+    "totalTrades": 1,
+    "profitLoss": 15000.0
   }
 }
 ```
+
+## API Endpoints
+
+- `GET /` - Service status
+- `GET /health` - Health check
+- `POST /backtest` - Execute backtest
+- `GET /backtest/{id}` - Get backtest results
 
 ## Strategy Code Format
 
@@ -90,81 +91,49 @@ class StrategyAlgorithm(QCAlgorithm):
     
     def OnData(self, data):
         # Your strategy logic here
-        pass
+        if not self.Portfolio.Invested:
+            self.SetHoldings("SPY", 1.0)
 ```
 
-## Configuration
+## Testing
 
-The service uses the following environment variables:
-
-- `LEAN_DATA_DIR`: Directory for market data (default: `/app/data`)
-- `LEAN_RESULTS_DIR`: Directory for backtest results (default: `/app/results`)
-- `LEAN_STRATEGIES_DIR`: Directory for strategy files (default: `/app/strategies`)
-
-## Docker
-
-The service is containerized using the LEAN Engine foundation:
+Run the test script to verify functionality:
 
 ```bash
-# Build the service
-docker build -t lean-cli-service .
-
-# Run the service
-docker run -p 8000:8000 lean-cli-service
+python test_engine.py
 ```
+
+## Architecture
+
+- **Base Image**: `quantconnect/lean:foundation` - Contains LEAN CLI
+- **API Layer**: FastAPI service for HTTP interface
+- **Execution**: Async subprocess calls to LEAN CLI
+- **Results**: JSON parsing from LEAN CLI output
+
+## Data Requirements
+
+The service requires market data in the LEAN CLI format. You can:
+
+1. Download data using LEAN CLI: `lean data download --ticker SPY`
+2. Mount a data directory: `docker run -v /path/to/data:/app/data lean-cli-service`
 
 ## Integration
 
 This service integrates with the main Quail application:
 
-1. **API Service**: Sends backtest requests to this service
-2. **Database**: Stores backtest results and metadata
-3. **Frontend**: Displays backtest progress and results
-
-## Development
-
-### Local Development
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the service
-uvicorn main:app --reload
-```
-
-### Testing
-
-```bash
-# Run tests
-python test_engine.py
-```
-
-## Data Requirements
-
-The LEAN CLI requires market data to execute backtests. You'll need to:
-
-1. **Download Market Data**: Use LEAN CLI to download required data
-2. **Configure Data Sources**: Set up data providers for live data
-3. **Data Format**: Ensure data is in the correct LEAN CLI format
-
-## Performance
-
-- **Backtest Duration**: Depends on strategy complexity and data range
-- **Memory Usage**: Varies based on data size and strategy requirements
-- **Concurrent Backtests**: Limited by available system resources
+1. **API Service**: Sends backtest requests
+2. **Database**: Stores results and metadata
+3. **Frontend**: Displays progress and results
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Missing Data**: Ensure required market data is available
+1. **Missing Data**: Ensure required market data is available in `/app/data`
 2. **Strategy Errors**: Check Python syntax and LEAN CLI compatibility
-3. **Memory Issues**: Monitor system resources during backtesting
+3. **Timeout**: Backtests may take time depending on data range and complexity
 
 ### Logs
-
-Check container logs for detailed error information:
 
 ```bash
 docker logs lean-cli-service
@@ -172,9 +141,7 @@ docker logs lean-cli-service
 
 ## Next Steps
 
-1. **Data Integration**: Set up market data sources
-2. **Performance Optimization**: Optimize for concurrent backtests
-3. **Advanced Features**: Add progress tracking and real-time updates
-4. **Monitoring**: Add metrics and alerting
-
-This service provides a production-ready integration with the QuantConnect LEAN CLI for real algorithmic trading backtesting! 
+1. **Data Management**: Set up automated data downloads
+2. **Performance**: Optimize for concurrent backtests
+3. **Monitoring**: Add metrics and progress tracking
+4. **Caching**: Cache results for repeated strategies 

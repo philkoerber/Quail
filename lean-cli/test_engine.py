@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Test script for the LEAN CLI service.
-This script tests the basic functionality of the service.
 """
 
 import requests
@@ -9,7 +8,6 @@ import json
 import time
 from pathlib import Path
 
-# Service URL
 BASE_URL = "http://localhost:8000"
 
 def test_health():
@@ -27,26 +25,29 @@ def test_health():
         print(f"❌ Health check failed: {e}")
         return False
 
-def test_execute_backtest():
-    """Test executing a backtest with LEAN CLI"""
-    print("\nTesting backtest execution with LEAN CLI...")
+def test_backtest():
+    """Test executing a backtest"""
+    print("\nTesting backtest execution...")
     
-    # Read test strategy
-    strategy_file = Path("test_strategy.py")
-    if not strategy_file.exists():
-        print("❌ Test strategy file not found")
-        return None
+    # Simple test strategy
+    strategy_code = """
+from AlgorithmImports import *
+
+class StrategyAlgorithm(QCAlgorithm):
+    def Initialize(self):
+        self.SetStartDate(2020, 1, 1)
+        self.SetEndDate(2021, 1, 1)
+        self.SetCash(100000)
+        self.AddEquity("SPY")
     
-    with open(strategy_file, "r") as f:
-        strategy_code = f.read()
+    def OnData(self, data):
+        if not self.Portfolio.Invested:
+            self.SetHoldings("SPY", 1.0)
+"""
     
-    # Create backtest request
     request_data = {
-        "backtest_id": "lean-cli-test-123",
-        "strategy_code": strategy_code,
-        "start_date": "2020-01-01",
-        "end_date": "2021-01-01",
-        "initial_capital": 100000.0
+        "backtest_id": "test-123",
+        "strategy_code": strategy_code
     }
     
     try:
@@ -59,75 +60,63 @@ def test_execute_backtest():
         if response.status_code == 200:
             result = response.json()
             print(f"✅ Backtest started: {result['backtest_id']}")
-            print(f"   Status: {result['status']}")
             return result['backtest_id']
         else:
-            print(f"❌ Backtest execution failed: {response.status_code}")
+            print(f"❌ Backtest failed: {response.status_code}")
             print(f"Response: {response.text}")
             return None
     except Exception as e:
-        print(f"❌ Backtest execution failed: {e}")
+        print(f"❌ Backtest failed: {e}")
         return None
 
-def test_backtest_result(backtest_id):
-    """Test checking backtest result"""
-    print(f"\nTesting backtest result for {backtest_id}...")
-    
+def check_result(backtest_id):
+    """Check backtest result"""
     try:
         response = requests.get(f"{BASE_URL}/backtest/{backtest_id}")
         
         if response.status_code == 200:
             result = response.json()
-            print(f"✅ Status: {result['status']}")
+            print(f"Status: {result['status']}")
             
             if result.get('results'):
-                print(f"   Total Return: {result['results']['totalReturn']:.2%}")
-                print(f"   Sharpe Ratio: {result['results']['sharpeRatio']:.2f}")
-                print(f"   Max Drawdown: {result['results']['maxDrawdown']:.2%}")
-                print(f"   Win Rate: {result['results']['winRate']:.2%}")
-                print(f"   Final Portfolio Value: ${result['results']['finalPortfolioValue']:,.2f}")
+                print(f"Total Return: {result['results']['totalReturn']:.2%}")
+                print(f"Sharpe Ratio: {result['results']['sharpeRatio']:.2f}")
+                print(f"Max Drawdown: {result['results']['maxDrawdown']:.2%}")
+                print(f"Final Portfolio: ${result['results']['finalPortfolioValue']:,.2f}")
             
             if result.get('error'):
-                print(f"   Error: {result['error']}")
+                print(f"Error: {result['error']}")
                 
-            return result
+            return result['status'] == 'completed'
         else:
             print(f"❌ Result check failed: {response.status_code}")
-            return None
+            return False
     except Exception as e:
         print(f"❌ Result check failed: {e}")
-        return None
+        return False
 
 def main():
-    """Run all tests"""
+    """Run tests"""
     print("🧪 Testing LEAN CLI Service")
-    print("=" * 50)
+    print("=" * 40)
     
-    # Test health
     if not test_health():
-        print("\n❌ Service is not running. Please start the service first.")
+        print("\n❌ Service not running. Start with: uvicorn main:app --reload")
         return
     
-    # Test execute backtest
-    backtest_id = test_execute_backtest()
+    backtest_id = test_backtest()
     if not backtest_id:
-        print("\n❌ Failed to execute backtest. Stopping tests.")
         return
     
-    # Test result immediately
-    test_backtest_result(backtest_id)
-    
-    # Wait and check result again (LEAN CLI takes longer)
-    print("\n⏳ Waiting 10 seconds for LEAN CLI to complete backtest...")
-    time.sleep(10)
-    test_backtest_result(backtest_id)
-    
-    # Wait a bit more if still running
-    print("\n⏳ Waiting another 10 seconds...")
-    time.sleep(10)
-    test_backtest_result(backtest_id)
-    
-    print("\n✅ All tests completed!")
+    # Wait for completion
+    print("\n⏳ Waiting for backtest to complete...")
+    for i in range(10):
+        time.sleep(5)
+        if check_result(backtest_id):
+            print("\n✅ Backtest completed!")
+            break
+    else:
+        print("\n⏰ Backtest still running after 50 seconds")
 
 if __name__ == "__main__":
     main() 
