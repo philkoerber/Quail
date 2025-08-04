@@ -59,6 +59,65 @@ For testing the application, you can use these pre-created credentials:
 - **Email:** `test@example.com`
 - **Password:** `testpass123`
 
+## 🧪 Testing
+
+### Comprehensive Testing Suite
+
+The project includes multiple testing layers to ensure reliability and functionality:
+
+#### 1. Integration Testing
+Run the complete system integration test:
+```bash
+python3 test_integration.py
+```
+
+This test verifies:
+- ✅ All services are healthy and responding
+- ✅ Lean-CLI backtest functionality
+- ✅ Database connectivity and data persistence
+- ✅ API endpoints accessibility
+- ✅ Frontend accessibility
+- ✅ Complete system integration
+
+#### 2. LEAN CLI Testing
+Test the backtest service specifically:
+```bash
+cd lean-cli
+source venv/bin/activate
+python test_lean_cli.py
+```
+
+This test verifies:
+- ✅ Health check functionality
+- ✅ Simple backtest execution
+- ✅ Complex trading strategy processing
+- ✅ Error handling and edge cases
+- ✅ Results generation and storage
+
+#### 3. Service Health Checks
+Quick health verification:
+```bash
+# Database
+docker exec quail-postgres-1 pg_isready -U quail_user -d quail_db
+
+# Lean-CLI
+curl http://localhost:8000/health
+
+# API
+curl http://localhost:3000/strategies
+
+# Frontend
+curl http://localhost:4200
+```
+
+### Test Results
+
+All tests should pass with results like:
+```
+📊 Integration Test Results: 5/5 tests passed
+🎉 All integration tests passed! The Quail platform is fully operational.
+```
+
 ## 🐳 Docker Setup
 
 ### Overview
@@ -92,7 +151,9 @@ Quail/
 ├── run.sh                      # Easy runner script
 ├── api/Dockerfile              # Unified API Dockerfile
 ├── frontend/Dockerfile         # Multi-stage frontend Dockerfile
-└── lean-cli/Dockerfile         # LEAN CLI Dockerfile
+├── lean-cli/Dockerfile         # LEAN CLI Dockerfile
+├── test_integration.py         # System integration tests
+└── lean-cli/test_lean_cli.py   # LEAN CLI specific tests
 ```
 
 ### Usage
@@ -149,12 +210,14 @@ Quail/
 ├── docker-compose.yml          # Production configuration
 ├── docker-compose.dev.yml      # Development configuration
 ├── run.sh                      # Easy runner script
+├── test_integration.py         # System integration tests
 ├── api/                        # NestJS API
 │   ├── src/
 │   │   ├── entities/           # Database entities
 │   │   ├── auth/               # Authentication module
 │   │   ├── strategy/           # Strategy management
 │   │   ├── backtest/           # Backtest execution
+│   │   ├── lean/               # LEAN CLI integration
 │   │   ├── common/
 │   │   │   └── dto/            # Shared DTOs
 │   │   └── main.ts             # Application entry point
@@ -174,7 +237,11 @@ Quail/
 │   ├── main.py                 # FastAPI application
 │   ├── requirements.txt        # Python dependencies
 │   ├── Dockerfile              # Unified Dockerfile
-│   └── test_engine.py          # Test script
+│   ├── test_lean_cli.py        # LEAN CLI test suite
+│   ├── backtest_status.json    # Persistent backtest status
+│   ├── strategies/             # Generated strategy files
+│   ├── results/                # Backtest results
+│   └── data/                   # Market data
 ├── docker/
 │   └── postgres/
 │       └── init.sql/           # Database initialization scripts
@@ -242,14 +309,17 @@ The system uses JWT-based authentication with access and refresh tokens:
 
 ### Overview
 
-A streamlined FastAPI service that integrates with the QuantConnect LEAN CLI for backtesting. This service provides a simple REST API interface to execute trading strategy backtests.
+A streamlined FastAPI service that integrates with the QuantConnect LEAN CLI for backtesting. This service provides a simple REST API interface to execute trading strategy backtests with persistent storage and comprehensive testing.
 
 ### Features
 
 - **LEAN CLI Integration**: Uses the actual QuantConnect LEAN CLI for backtesting
 - **Simple REST API**: Clean HTTP interface for strategy execution
 - **Real Backtesting**: Executes actual backtests, not simulations
+- **Persistent Storage**: JSON-based status tracking that survives restarts
 - **Docker Ready**: Containerized with LEAN Engine foundation
+- **Comprehensive Testing**: Full test suite for reliability
+- **Error Handling**: Robust error handling and status tracking
 
 ### API Usage
 
@@ -320,6 +390,38 @@ The service requires market data in the LEAN CLI format. You can:
 
 1. Download data using LEAN CLI: `lean data download --ticker SPY`
 2. Mount a data directory: `docker run -v /path/to/data:/app/data lean-cli-service`
+
+### Testing the LEAN CLI Service
+
+#### Run the Test Suite
+```bash
+cd lean-cli
+source venv/bin/activate
+python test_lean_cli.py
+```
+
+#### Manual Testing
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Simple backtest
+curl -X POST http://localhost:8000/backtest \
+  -H "Content-Type: application/json" \
+  -d '{"backtest_id": "test_001", "strategy_code": "print(\"Hello World\")"}'
+
+# Check results
+curl http://localhost:8000/backtest/test_001
+```
+
+### Persistent Storage
+
+The service uses JSON-based persistent storage:
+- **Status File**: `backtest_status.json` - Tracks all backtest statuses
+- **Strategy Files**: `/app/strategies/{backtest_id}/strategy.py` - Generated strategy files
+- **Results**: `/app/results/{backtest_id}/` - Backtest result files
+
+This ensures that backtest status and results persist across service restarts.
 
 ## 🏗️ DTOs (Data Transfer Objects) - Modular Structure
 
