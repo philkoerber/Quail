@@ -36,19 +36,43 @@ class BacktestResult(BaseModel):
     results: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
-# Global storage for backtest status
-backtest_status = {}
-
 # Use local directories for development
 BASE_DIR = Path(__file__).parent
 STRATEGIES_DIR = BASE_DIR / "strategies"
 RESULTS_DIR = BASE_DIR / "results"
 DATA_DIR = BASE_DIR / "data"
+STATUS_FILE = BASE_DIR / "backtest_status.json"
 
 # Create directories if they don't exist
 STRATEGIES_DIR.mkdir(exist_ok=True)
 RESULTS_DIR.mkdir(exist_ok=True)
 DATA_DIR.mkdir(exist_ok=True)
+
+def load_backtest_status() -> Dict[str, Any]:
+    """Load backtest status from JSON file"""
+    if STATUS_FILE.exists():
+        try:
+            with open(STATUS_FILE, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading status file: {e}")
+    return {}
+
+def save_backtest_status(status: Dict[str, Any]):
+    """Save backtest status to JSON file"""
+    try:
+        with open(STATUS_FILE, "w") as f:
+            json.dump(status, f, indent=2)
+    except Exception as e:
+        print(f"Error saving status file: {e}")
+
+def update_backtest_status(backtest_id: str, updates: Dict[str, Any]):
+    """Update backtest status and save to file"""
+    status = load_backtest_status()
+    if backtest_id not in status:
+        status[backtest_id] = {}
+    status[backtest_id].update(updates)
+    save_backtest_status(status)
 
 @app.get("/")
 async def root():
@@ -64,12 +88,12 @@ async def execute_backtest(request: BacktestRequest, background_tasks: Backgroun
     backtest_id = request.backtest_id
     
     # Initialize status
-    backtest_status[backtest_id] = {
+    update_backtest_status(backtest_id, {
         "status": "running",
         "created_at": datetime.now().isoformat(),
         "results": None,
         "error": None
-    }
+    })
     
     # Start backtest in background
     background_tasks.add_task(run_lean_backtest, backtest_id, request)
@@ -82,15 +106,16 @@ async def execute_backtest(request: BacktestRequest, background_tasks: Backgroun
 @app.get("/backtest/{backtest_id}", response_model=BacktestResult)
 async def get_backtest_result(backtest_id: str):
     """Get the result of a backtest"""
-    if backtest_id not in backtest_status:
+    status = load_backtest_status()
+    if backtest_id not in status:
         raise HTTPException(status_code=404, detail="Backtest not found")
     
-    status = backtest_status[backtest_id]
+    backtest_status = status[backtest_id]
     return BacktestResult(
         backtest_id=backtest_id,
-        status=status["status"],
-        results=status.get("results"),
-        error=status.get("error")
+        status=backtest_status["status"],
+        results=backtest_status.get("results"),
+        error=backtest_status.get("error")
     )
 
 async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
@@ -137,12 +162,18 @@ async def run_lean_backtest(backtest_id: str, request: BacktestRequest):
         }
         
         # Update status with results
-        backtest_status[backtest_id]["status"] = "completed"
-        backtest_status[backtest_id]["results"] = results
+        update_backtest_status(backtest_id, {
+            "status": "completed",
+            "results": results,
+            "completed_at": datetime.now().isoformat()
+        })
             
     except Exception as e:
-        backtest_status[backtest_id]["status"] = "failed"
-        backtest_status[backtest_id]["error"] = str(e)
+        update_backtest_status(backtest_id, {
+            "status": "failed",
+            "error": str(e),
+            "failed_at": datetime.now().isoformat()
+        })
 
 def parse_lean_results(backtest_id: str) -> Optional[Dict[str, Any]]:
     """Parse results from LEAN CLI output"""

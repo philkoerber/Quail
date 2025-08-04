@@ -10,7 +10,7 @@ export class Backtest {
     @Column()
     name: string;
 
-    @Column('json')
+    @Column('json', { nullable: true })
     results: Record<string, any>; // Backtest results
 
     @Column({ default: 'completed' })
