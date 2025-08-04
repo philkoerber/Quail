@@ -24,12 +24,15 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://quail_user:quail_password@postgres:5432/quail_db
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-in-production
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-in-production}
+      NODE_ENV: ${NODE_ENV:-production}
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,6 +45,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: ${NODE_ENV:-production}
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "4200:4200"
     depends_on:
@@ -54,6 +60,8 @@ services:
     build:
       context: ./lean-cli
       dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "8000:8000"
     volumes:

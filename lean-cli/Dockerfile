@@ -1,3 +1,6 @@
+# Build argument to determine environment
+ARG NODE_ENV=production
+
 # LEAN CLI Service Dockerfile
 FROM quantconnect/lean:foundation
 
@@ -21,5 +24,5 @@ RUN mkdir -p /app/strategies /app/results /app/data
 # Expose port
 EXPOSE 8000
 
-# Start service
+# Start service with or without reload based on environment
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 

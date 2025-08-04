@@ -24,22 +24,34 @@ The system is built with a modern microservices architecture:
 
 ### Running the Application
 
-1. **Clone and navigate to the project:**
-   ```bash
-   cd Quail
-   ```
+The application supports both development and production modes with a unified Docker setup.
 
-2. **Start all services with Docker Compose:**
-   ```bash
-   docker-compose up --build
-   ```
+#### Development Mode (Recommended for development)
+```bash
+./run.sh dev up
+```
 
-3. **Access the application:**
-   - Frontend: http://localhost:4200
-   - API: http://localhost:3000
-   - LEAN Engine: http://localhost:8000
-   - PostgreSQL: localhost:5433
-   - Ollama: http://localhost:11434
+#### Production Mode
+```bash
+./run.sh prod up
+```
+
+#### Other Commands
+```bash
+./run.sh dev down    # Stop containers
+./run.sh dev build   # Build containers
+./run.sh dev logs    # View logs
+./run.sh dev restart # Restart containers
+```
+
+### Access the Application
+
+Once started, you can access:
+- **Frontend**: http://localhost:4200
+- **API**: http://localhost:3000
+- **LEAN Engine**: http://localhost:8000
+- **PostgreSQL**: localhost:5433
+- **Ollama**: http://localhost:11434
 
 ### Test Credentials
 
@@ -47,40 +59,107 @@ For testing the application, you can use these pre-created credentials:
 - **Email:** `test@example.com`
 - **Password:** `testpass123`
 
-### Development Setup
+## 🐳 Docker Setup
 
-For local development without Docker:
+### Overview
 
-#### Backend (NestJS API)
+The setup uses separate Docker Compose files for development and production environments, providing a clean and simple approach to managing different deployment modes.
 
-```bash
-cd api
-npm install
-npm run start:dev
+### Key Features
+
+#### Development Mode (`docker-compose.dev.yml`)
+- Hot reload for API (NestJS)
+- Hot reload for Frontend (Angular)
+- Hot reload for LEAN CLI (FastAPI)
+- Source code volume mounts for live editing
+- File watching enabled
+- Development-specific environment variables
+
+#### Production Mode (`docker-compose.yml`)
+- Optimized multi-stage builds
+- Minimal production images
+- No development dependencies
+- Static file serving for frontend
+- Production-optimized commands
+- No volume mounts (code baked into images)
+
+### File Structure
+
+```
+Quail/
+├── docker-compose.yml          # Production configuration
+├── docker-compose.dev.yml      # Development configuration
+├── run.sh                      # Easy runner script
+├── api/Dockerfile              # Unified API Dockerfile
+├── frontend/Dockerfile         # Multi-stage frontend Dockerfile
+└── lean-cli/Dockerfile         # LEAN CLI Dockerfile
 ```
 
-#### Frontend (Angular)
+### Usage
+
+The `run.sh` script provides a simple interface for managing both environments:
 
 ```bash
-cd frontend
-npm install
-npm start
+# Development mode (with hot reload)
+./run.sh dev up
+
+# Production mode (optimized builds)
+./run.sh prod up
+
+# Stop containers
+./run.sh dev down
+./run.sh prod down
+
+# View logs
+./run.sh dev logs
+./run.sh prod logs
+
+# Rebuild containers
+./run.sh dev build
+./run.sh prod build
+
+# Restart containers
+./run.sh dev restart
+./run.sh prod restart
+```
+
+### Troubleshooting
+
+#### Clean Build
+If you encounter issues, try a clean build:
+```bash
+./run.sh dev down
+docker-compose -f docker-compose.dev.yml build --no-cache
+./run.sh dev up
+```
+
+#### Reset Everything
+```bash
+./run.sh dev down
+docker-compose -f docker-compose.dev.yml down -v  # Removes volumes
+docker system prune -f  # Removes unused images
+./run.sh dev build
+./run.sh dev up
 ```
 
 ## 📁 Project Structure
 
 ```
 Quail/
-├── docker-compose.yml          # Main orchestration file
+├── docker-compose.yml          # Production configuration
+├── docker-compose.dev.yml      # Development configuration
+├── run.sh                      # Easy runner script
 ├── api/                        # NestJS API
 │   ├── src/
 │   │   ├── entities/           # Database entities
 │   │   ├── auth/               # Authentication module
 │   │   ├── strategy/           # Strategy management
 │   │   ├── backtest/           # Backtest execution
+│   │   ├── common/
+│   │   │   └── dto/            # Shared DTOs
 │   │   └── main.ts             # Application entry point
 │   ├── package.json
-│   └── Dockerfile
+│   └── Dockerfile              # Unified Dockerfile
 ├── frontend/                   # Angular application
 │   ├── src/
 │   │   ├── app/
@@ -90,13 +169,12 @@ Quail/
 │   │   ├── styles.css          # Tailwind CSS
 │   │   └── main.ts
 │   ├── package.json
-│   └── Dockerfile
-├── lean-engine/                # LEAN Engine service
+│   └── Dockerfile              # Unified Dockerfile
+├── lean-cli/                   # LEAN CLI service
 │   ├── main.py                 # FastAPI application
 │   ├── requirements.txt        # Python dependencies
-│   ├── Dockerfile              # Production container
-│   ├── Dockerfile.dev          # Development container
-│   └── README.md               # Service documentation
+│   ├── Dockerfile              # Unified Dockerfile
+│   └── test_engine.py          # Test script
 ├── docker/
 │   └── postgres/
 │       └── init.sql/           # Database initialization scripts
@@ -128,8 +206,8 @@ The system uses JWT-based authentication with access and refresh tokens:
 2. **Strategy Creation**: Users create trading strategies with Python code
 3. **Backtest Execution**: LEAN Engine service runs backtests on strategies
 4. **Results Analysis**: Performance metrics are stored
-6. **Strategy Refinement**: AI implements improvements and re-test
-7. **Iterative Improvement**: Continuous cycle of testing and refinement
+5. **Strategy Refinement**: AI implements improvements and re-test
+6. **Iterative Improvement**: Continuous cycle of testing and refinement
 
 ## 🛠️ API Endpoints
 
@@ -159,6 +237,190 @@ The system uses JWT-based authentication with access and refresh tokens:
 - **Strategy Management**: CRUD operations for trading strategies
 - **Backtest Visualization**: Charts and metrics display
 - **Real-time Updates**: WebSocket integration for live data
+
+## 📈 LEAN CLI Service
+
+### Overview
+
+A streamlined FastAPI service that integrates with the QuantConnect LEAN CLI for backtesting. This service provides a simple REST API interface to execute trading strategy backtests.
+
+### Features
+
+- **LEAN CLI Integration**: Uses the actual QuantConnect LEAN CLI for backtesting
+- **Simple REST API**: Clean HTTP interface for strategy execution
+- **Real Backtesting**: Executes actual backtests, not simulations
+- **Docker Ready**: Containerized with LEAN Engine foundation
+
+### API Usage
+
+#### Execute a Backtest
+
+```bash
+curl -X POST "http://localhost:8000/backtest" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "backtest_id": "my-test-123",
+    "strategy_code": "from AlgorithmImports import *\nclass StrategyAlgorithm(QCAlgorithm):\n    def Initialize(self):\n        self.SetStartDate(2020, 1, 1)\n        self.SetEndDate(2021, 1, 1)\n        self.SetCash(100000)\n        self.AddEquity(\"SPY\")\n    def OnData(self, data):\n        if not self.Portfolio.Invested:\n            self.SetHoldings(\"SPY\", 1.0)"
+  }'
+```
+
+#### Check Results
+
+```bash
+curl "http://localhost:8000/backtest/my-test-123"
+```
+
+Response:
+```json
+{
+  "backtest_id": "my-test-123",
+  "status": "completed",
+  "results": {
+    "totalReturn": 0.15,
+    "sharpeRatio": 1.2,
+    "maxDrawdown": -0.08,
+    "winRate": 0.65,
+    "finalPortfolioValue": 115000.0,
+    "totalTrades": 1,
+    "profitLoss": 15000.0
+  }
+}
+```
+
+### API Endpoints
+
+- `GET /` - Service status
+- `GET /health` - Health check
+- `POST /backtest` - Execute backtest
+- `GET /backtest/{id}` - Get backtest results
+
+### Strategy Code Format
+
+The service accepts Python strategy code that follows the LEAN CLI format:
+
+```python
+from AlgorithmImports import *
+
+class StrategyAlgorithm(QCAlgorithm):
+    def Initialize(self):
+        self.SetStartDate(2020, 1, 1)
+        self.SetEndDate(2021, 1, 1)
+        self.SetCash(100000)
+        self.AddEquity("SPY")
+    
+    def OnData(self, data):
+        # Your strategy logic here
+        if not self.Portfolio.Invested:
+            self.SetHoldings("SPY", 1.0)
+```
+
+### Data Requirements
+
+The service requires market data in the LEAN CLI format. You can:
+
+1. Download data using LEAN CLI: `lean data download --ticker SPY`
+2. Mount a data directory: `docker run -v /path/to/data:/app/data lean-cli-service`
+
+## 🏗️ DTOs (Data Transfer Objects) - Modular Structure
+
+This project follows the **modular DTO approach**, which is the most common pattern in NestJS applications.
+
+### Structure
+
+#### Module-Specific DTOs
+Each module contains its own DTOs in a `dto/` subfolder:
+
+```
+src/
+├── auth/
+│   ├── dto/
+│   │   ├── auth.dto.ts      # RegisterDto, LoginDto, RefreshTokenDto
+│   │   └── index.ts
+│   ├── auth.controller.ts
+│   └── auth.service.ts
+├── strategy/
+│   ├── dto/
+│   │   ├── strategy.dto.ts  # CreateStrategyDto, UpdateStrategyDto
+│   │   └── index.ts
+│   ├── strategy.controller.ts
+│   └── strategy.service.ts
+├── backtest/
+│   ├── dto/
+│   │   ├── backtest.dto.ts  # CreateBacktestDto, UpdateBacktestDto
+│   │   └── index.ts
+│   ├── backtest.controller.ts
+│   └── backtest.service.ts
+└── common/
+    └── dto/
+        ├── common.dto.ts    # IdParamDto, PaginationDto, ApiResponse
+        ├── response.dto.ts  # Response DTOs
+        └── index.ts
+```
+
+#### Shared DTOs
+The `common/dto/` folder contains DTOs that are used across multiple modules:
+
+- **`IdParamDto`**: For route parameters requiring UUID
+- **`PaginationDto`**: For paginated requests
+- **`ApiResponse<T>`**: Generic API response wrapper
+- **`PaginatedResponse<T>`**: For paginated responses
+- **Response DTOs**: `UserResponseDto`, `StrategyResponseDto`, etc.
+
+### Benefits of This Approach
+
+1. **Modularity**: Each module is self-contained
+2. **Co-location**: DTOs are close to where they're used
+3. **Clear ownership**: Easy to see which DTOs belong to which module
+4. **Easier imports**: Shorter relative import paths
+5. **Better encapsulation**: Module-specific DTOs stay with their module
+6. **Scalability**: Easy to add new modules without affecting others
+
+### Usage Examples
+
+#### In Controllers
+```typescript
+// Module-specific DTOs
+import { CreateStrategyDto, UpdateStrategyDto } from './dto';
+
+// Shared DTOs
+import { IdParamDto } from '../common/dto';
+
+@Post()
+async create(@Body() strategyData: CreateStrategyDto) {
+    // strategyData is validated and typed
+}
+```
+
+#### Cross-Module Usage
+If you need to use a DTO from another module:
+
+```typescript
+// Import from another module
+import { RegisterDto } from '../auth/dto';
+
+// Import shared DTOs
+import { IdParamDto, UserResponseDto } from '../common/dto';
+```
+
+### When to Use Each Approach
+
+#### Use Module-Specific DTOs When:
+- The DTO is only used within one module
+- You want to keep modules self-contained
+- The DTO is specific to that module's domain
+
+#### Use Shared DTOs When:
+- The DTO is used across multiple modules
+- It's a common pattern (like ID parameters)
+- It's a generic utility (like pagination)
+
+### Best Practices
+
+1. **Keep DTOs close to their usage** - Put them in the module's `dto/` folder
+2. **Use index.ts files** - For clean imports
+3. **Share common patterns** - Put reusable DTOs in `common/dto/`
+4. **Be specific with naming** - Use clear, descriptive names
+5. **Document validation rules** - Use meaningful error messages
 
 ## 🔧 Configuration
 
@@ -197,12 +459,12 @@ The PostgreSQL database is automatically initialized with:
 
 1. **Build the application:**
    ```bash
-   docker-compose -f docker-compose.prod.yml build
+   ./run.sh prod build
    ```
 
 2. **Deploy with production settings:**
    ```bash
-   docker-compose -f docker-compose.prod.yml up -d
+   ./run.sh prod up
    ```
 
 ### Scaling
@@ -233,6 +495,12 @@ npm run test:e2e
 ```bash
 cd frontend
 npm run test
+```
+
+### LEAN CLI Testing
+```bash
+cd lean-cli
+python test_engine.py
 ```
 
 ## 🤝 Contributing

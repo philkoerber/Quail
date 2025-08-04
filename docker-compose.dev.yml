@@ -23,13 +23,15 @@ services:
   api:
     build:
       context: ./api
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: development
     ports:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://quail_user:quail_password@postgres:5432/quail_db
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-in-production
+      JWT_SECRET: dev-jwt-secret-key
+      JWT_REFRESH_SECRET: dev-refresh-secret-key
       NODE_ENV: development
     volumes:
       - ./api:/app
@@ -46,7 +48,10 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      target: development
+      args:
+        NODE_ENV: development
     ports:
       - "4200:4200"
     volumes:
@@ -62,7 +67,9 @@ services:
   lean-cli:
     build:
       context: ./lean-cli
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: development
     ports:
       - "8000:8000"
     volumes:
@@ -77,6 +84,7 @@ services:
     networks:
       - quail_network
     restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   # Ollama for LLM management
   ollama:
