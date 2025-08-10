@@ -33,6 +33,7 @@ services:
       JWT_SECRET: dev-jwt-secret-key
       JWT_REFRESH_SECRET: dev-refresh-secret-key
       NODE_ENV: development
+      LEAN_CLI_URL: http://lean-cli:8000
     volumes:
       - ./api:/app
       - /app/node_modules

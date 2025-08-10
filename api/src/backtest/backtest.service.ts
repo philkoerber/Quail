@@ -75,7 +75,7 @@ export class BacktestService {
   async findOne(userId: string, id: string) {
     const backtest = await this.backtestRepository.findOne({
       where: { id, userId },
-      relations: ['strategy', 'metrics'],
+      relations: ['strategy'],
     });
 
     if (!backtest) {

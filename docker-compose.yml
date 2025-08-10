@@ -33,6 +33,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-in-production}
       NODE_ENV: ${NODE_ENV:-production}
+      LEAN_CLI_URL: http://lean-cli:8000
     depends_on:
       postgres:
         condition: service_healthy

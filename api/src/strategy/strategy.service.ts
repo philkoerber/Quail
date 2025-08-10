@@ -2,12 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Strategy } from '../entities/strategy.entity';
+import { Backtest } from '../entities/backtest.entity';
 
 @Injectable()
 export class StrategyService {
     constructor(
         @InjectRepository(Strategy)
         private strategyRepository: Repository<Strategy>,
+        @InjectRepository(Backtest)
+        private backtestRepository: Repository<Backtest>,
     ) { }
 
     async create(userId: string, strategyData: {
@@ -53,6 +56,10 @@ export class StrategyService {
     async remove(userId: string, id: string) {
         const strategy = await this.findOne(userId, id);
 
+        // First, delete all backtests associated with this strategy
+        await this.backtestRepository.delete({ strategyId: id });
+
+        // Then delete the strategy
         return this.strategyRepository.remove(strategy);
     }
 
