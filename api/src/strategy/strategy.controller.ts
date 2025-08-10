@@ -19,6 +19,11 @@ export class StrategyController {
         return this.strategyService.findAll(req.user.userId);
     }
 
+    @Get('stats')
+    async getStats(@Request() req) {
+        return this.strategyService.getStats(req.user.userId);
+    }
+
     @Get(':id')
     async findOne(@Request() req, @Param() params: IdParamDto) {
         return this.strategyService.findOne(req.user.userId, params.id);

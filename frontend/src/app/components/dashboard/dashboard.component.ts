@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ChartService } from '../../services/chart.service';
+import { StrategyService } from '../../services/strategy.service';
 import ApexCharts from 'apexcharts';
 
 @Component({
@@ -16,7 +17,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   chart: any;
   stats = {
     strategies: 0,
-    backtests: 0,
     activeStrategies: 0,
   };
   recentActivity = [
@@ -35,11 +35,25 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private chartService: ChartService
+    private chartService: ChartService,
+    private strategyService: StrategyService
   ) { }
 
   ngOnInit() {
     this.user = this.authService.currentUserValue;
+    this.loadStats();
+  }
+
+  loadStats() {
+    this.strategyService.getStats().subscribe({
+      next: (stats) => {
+        this.stats.strategies = stats.totalStrategies;
+        this.stats.activeStrategies = stats.activeStrategies;
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error);
+      }
+    });
   }
 
   ngAfterViewInit() {

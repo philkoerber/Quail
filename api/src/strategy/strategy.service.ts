@@ -63,4 +63,16 @@ export class StrategyService {
         return this.strategyRepository.remove(strategy);
     }
 
+    async getStats(userId: string) {
+        const [totalStrategies, activeStrategies] = await Promise.all([
+            this.strategyRepository.count({ where: { userId } }),
+            this.strategyRepository.count({ where: { userId, isActive: true } })
+        ]);
+
+        return {
+            totalStrategies,
+            activeStrategies
+        };
+    }
+
 } 
